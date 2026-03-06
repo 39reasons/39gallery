@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { fetchUserPosts } from "@/lib/instagram";
+import { fetchPosts } from "@/lib/instagram";
 import { MEMBERS } from "@/types/instagram";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ username: string }> }
 ) {
   const { username } = await params;
@@ -14,7 +14,7 @@ export async function GET(
   }
 
   try {
-    const posts = await fetchUserPosts(username);
+    const posts = fetchPosts(username);
     return NextResponse.json({ posts });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

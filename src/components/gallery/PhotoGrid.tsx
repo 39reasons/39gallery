@@ -36,6 +36,7 @@ export function PhotoGrid({ posts, onSelect }: PhotoGridProps) {
             src={post.imageUrl}
             alt={post.caption.slice(0, 100)}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            referrerPolicy="no-referrer"
             loading="lazy"
           />
           {post.isVideo && (

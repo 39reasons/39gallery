@@ -2,19 +2,25 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Loader2 } from "lucide-react";
+import { ViewToggle } from "./ViewToggle";
 import { MemberTabs } from "./MemberTabs";
 import { PhotoGrid } from "./PhotoGrid";
 import { Lightbox } from "./Lightbox";
-import { MEMBERS, type MemberKey, type InstagramPost } from "@/types/instagram";
+import { DMGrid } from "./DMGrid";
+import { DMLightbox } from "./DMLightbox";
+import { MEMBERS, type MemberKey, type ViewMode, type InstagramPost, type WeversePost } from "@/types/instagram";
 
 export function Gallery() {
+  const [viewMode, setViewMode] = useState<ViewMode>("instagram");
   const [selected, setSelected] = useState<MemberKey>("le_sserafim");
   const [posts, setPosts] = useState<InstagramPost[]>([]);
+  const [weversePosts, setWeversePosts] = useState<WeversePost[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lightboxPost, setLightboxPost] = useState<InstagramPost | null>(null);
+  const [dmLightboxPost, setDmLightboxPost] = useState<WeversePost | null>(null);
 
-  const fetchPosts = useCallback(async (memberKey: MemberKey) => {
+  const fetchInstagramPosts = useCallback(async (memberKey: MemberKey) => {
     const member = MEMBERS.find((m) => m.key === memberKey);
     if (!member) return;
 
@@ -34,13 +40,37 @@ export function Gallery() {
     }
   }, []);
 
+  const fetchWeverseDMs = useCallback(async (memberKey: MemberKey) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/weverse/${memberKey}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to fetch DM updates");
+      setWeversePosts(data.posts);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch DM updates");
+      setWeversePosts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    fetchPosts(selected);
-  }, [selected, fetchPosts]);
+    if (viewMode === "instagram") {
+      fetchInstagramPosts(selected);
+    } else {
+      fetchWeverseDMs(selected);
+    }
+  }, [selected, viewMode, fetchInstagramPosts, fetchWeverseDMs]);
 
   return (
     <div className="space-y-6">
-      <MemberTabs selected={selected} onSelect={setSelected} />
+      <div className="space-y-4">
+        <ViewToggle mode={viewMode} onModeChange={setViewMode} />
+        <MemberTabs selected={selected} onSelect={setSelected} />
+      </div>
 
       {loading && (
         <div className="flex justify-center py-20">
@@ -52,7 +82,11 @@ export function Gallery() {
         <div className="text-center py-20">
           <p className="text-destructive mb-2">{error}</p>
           <button
-            onClick={() => fetchPosts(selected)}
+            onClick={() =>
+              viewMode === "instagram"
+                ? fetchInstagramPosts(selected)
+                : fetchWeverseDMs(selected)
+            }
             className="text-sm text-muted-foreground hover:text-foreground underline"
           >
             Try again
@@ -60,12 +94,20 @@ export function Gallery() {
         </div>
       )}
 
-      {!loading && !error && (
+      {!loading && !error && viewMode === "instagram" && (
         <PhotoGrid posts={posts} onSelect={setLightboxPost} />
+      )}
+
+      {!loading && !error && viewMode === "weverse" && (
+        <DMGrid posts={weversePosts} onSelect={setDmLightboxPost} />
       )}
 
       {lightboxPost && (
         <Lightbox post={lightboxPost} onClose={() => setLightboxPost(null)} />
+      )}
+
+      {dmLightboxPost && (
+        <DMLightbox post={dmLightboxPost} onClose={() => setDmLightboxPost(null)} />
       )}
     </div>
   );

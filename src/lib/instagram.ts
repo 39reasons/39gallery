@@ -1,67 +1,71 @@
+import { execSync } from "child_process";
 import { InstagramPost } from "@/types/instagram";
 
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
-const BASE_URL = "https://instagram-scraper-api2.p.rapidapi.com/v1";
+const IG_APP_ID = "936619743392459";
+const USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
-interface RapidApiMediaItem {
-  id: string;
-  code: string;
-  image_versions?: { items?: { url: string; width: number; height: number }[] };
-  carousel_media?: { image_versions?: { items?: { url: string }[] } }[];
-  caption?: { text: string };
-  taken_at: number;
-  like_count?: number;
-  comment_count?: number;
-  media_type: number;
-  video_versions?: { url: string }[];
-}
-
-interface RapidApiResponse {
-  data?: {
-    items?: RapidApiMediaItem[];
+interface IgEdgeNode {
+  node: {
+    __typename: string;
+    id: string;
+    shortcode: string;
+    display_url: string;
+    thumbnail_src: string;
+    is_video: boolean;
+    video_url?: string;
+    taken_at_timestamp: number;
+    edge_media_preview_like: { count: number };
+    edge_media_to_comment: { count: number };
+    edge_media_to_caption: { edges: { node: { text: string } }[] };
+    edge_sidecar_to_children?: { edges: { node: { display_url: string } }[] };
   };
 }
 
-export async function fetchUserPosts(username: string): Promise<InstagramPost[]> {
-  if (!RAPIDAPI_KEY) {
-    throw new Error("RAPIDAPI_KEY is not configured");
-  }
+interface IgProfileResponse {
+  data: {
+    user: {
+      edge_owner_to_timeline_media: {
+        edges: IgEdgeNode[];
+      };
+    };
+  };
+}
 
-  const response = await fetch(`${BASE_URL}/posts?username_or_id_or_url=${username}`, {
-    headers: {
-      "x-rapidapi-key": RAPIDAPI_KEY,
-      "x-rapidapi-host": "instagram-scraper-api2.p.rapidapi.com",
-    },
-    next: { revalidate: 3600 },
-  });
+function proxyUrl(igUrl: string): string {
+  return `/api/image?url=${encodeURIComponent(igUrl)}`;
+}
 
-  if (!response.ok) {
-    throw new Error(`Instagram API error: ${response.status}`);
-  }
+export function fetchPosts(username: string): InstagramPost[] {
+  const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
 
-  const json: RapidApiResponse = await response.json();
-  const items = json.data?.items ?? [];
+  const stdout = execSync(
+    `curl -s "${url}" -H "x-ig-app-id: ${IG_APP_ID}" -H "User-Agent: ${USER_AGENT}"`,
+    { timeout: 15000 }
+  );
 
-  return items.map((item) => {
-    const imageVersions = item.image_versions?.items ?? [];
-    const mainImage = imageVersions[0]?.url ?? "";
-    const thumbnail = imageVersions.length > 1 ? imageVersions[imageVersions.length - 1]?.url ?? mainImage : mainImage;
+  const json: IgProfileResponse = JSON.parse(stdout.toString());
+  const edges = json.data.user.edge_owner_to_timeline_media.edges;
 
-    const carouselImages = item.carousel_media?.map(
-      (cm) => cm.image_versions?.items?.[0]?.url ?? ""
-    ).filter(Boolean);
+  return edges.map(({ node }) => {
+    const caption =
+      node.edge_media_to_caption.edges[0]?.node.text ?? "";
+
+    const carouselImages = node.edge_sidecar_to_children?.edges.map(
+      (e) => proxyUrl(e.node.display_url)
+    );
 
     return {
-      id: item.id,
-      shortcode: item.code,
-      imageUrl: mainImage,
-      thumbnailUrl: thumbnail,
-      caption: item.caption?.text ?? "",
-      timestamp: item.taken_at,
-      likeCount: item.like_count ?? 0,
-      commentCount: item.comment_count ?? 0,
-      isVideo: item.media_type === 2,
-      videoUrl: item.video_versions?.[0]?.url,
+      id: node.id,
+      shortcode: node.shortcode,
+      imageUrl: proxyUrl(node.display_url),
+      thumbnailUrl: proxyUrl(node.thumbnail_src),
+      caption,
+      timestamp: node.taken_at_timestamp,
+      likeCount: node.edge_media_preview_like.count,
+      commentCount: node.edge_media_to_comment.count,
+      isVideo: node.is_video,
+      videoUrl: node.video_url,
       carouselImages: carouselImages && carouselImages.length > 0 ? carouselImages : undefined,
     };
   });
