@@ -5,9 +5,7 @@ import { Loader2 } from "lucide-react";
 import { timeAgo } from "@/lib/time";
 import { Avatar } from "./Avatar";
 import { useTranslateButton, detectLanguages } from "./useTranslate";
-import { CommentsResponse, ApiComment } from "@/types/api-responses";
-
-type Comment = ApiComment;
+import { CommentsResponse, ApiComment as Comment } from "@/types/api-responses";
 
 function TranslateButton({ canTranslate, toggle, loading, showing }: {
   canTranslate: boolean;
@@ -20,6 +18,7 @@ function TranslateButton({ canTranslate, toggle, loading, showing }: {
     <button
       onClick={toggle}
       className="text-xs text-muted-foreground/70 hover:text-muted-foreground"
+      aria-label={loading ? "Translating" : showing ? "Show original" : "Translate"}
     >
       {loading ? (
         <Loader2 className="h-3 w-3 animate-spin inline" />
@@ -58,8 +57,6 @@ function ReplyItem({ reply }: { reply: Comment }) {
     </div>
   );
 }
-
-export { type Comment };
 
 export const CommentItem = memo(function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: string }) {
   const [replies, setReplies] = useState<Comment[]>([]);
@@ -135,6 +132,7 @@ export const CommentItem = memo(function CommentItem({ comment, mediaId }: { com
               <button
                 onClick={loadReplies}
                 className="text-xs text-muted-foreground/70 hover:text-muted-foreground"
+                aria-expanded={expanded}
               >
                 {loading ? (
                   <Loader2 className="h-3 w-3 animate-spin inline" />

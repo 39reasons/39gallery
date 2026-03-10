@@ -4,7 +4,8 @@ import { useEffect, useCallback, useState, useRef } from "react";
 import { Heart, MessageCircle, Loader2 } from "lucide-react";
 import { InstagramPost } from "@/types/instagram";
 import { LightboxShell } from "./LightboxShell";
-import { CommentItem, type Comment } from "./lightbox/CommentItem";
+import { CommentItem } from "./lightbox/CommentItem";
+import type { ApiComment as Comment } from "@/types/api-responses";
 import { useTranslateButton, detectLanguages } from "./lightbox/useTranslate";
 import { useCarousel } from "./lightbox/useCarousel";
 import { CarouselControls } from "./lightbox/CarouselControls";
@@ -96,7 +97,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
 
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const lastTapRef = useRef(0);
-  const heartTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const heartTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const handleDoubleTap = useCallback(() => {
     const now = Date.now();
@@ -127,6 +128,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
     <button
       onClick={captionTranslate.toggle}
       className="text-xs text-muted-foreground/70 hover:text-muted-foreground"
+      aria-label={captionTranslate.loading ? "Translating caption" : captionTranslate.showing ? "Show original caption" : "Translate caption"}
     >
       {captionTranslate.loading ? (
         <Loader2 className="h-3 w-3 animate-spin inline" />
@@ -163,6 +165,8 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
               onClick={handleLike}
               disabled={liking}
               className="flex items-center gap-1 hover:text-foreground transition-colors"
+              aria-label={liked ? "Unlike" : "Like"}
+              aria-pressed={liked}
             >
               <Heart className={`h-4 w-4 ${liked ? "fill-red-500 text-red-500" : ""}`} />
               {post.likeCount.toLocaleString()}
