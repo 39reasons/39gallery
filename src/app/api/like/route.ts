@@ -43,6 +43,7 @@ export async function POST(request: Request) {
     });
 
     if (!res.ok) {
+      res.body?.cancel();
       console.error("[like]", `Instagram returned ${res.status}`);
       return NextResponse.json({ error: "Like action failed" }, { status: 400 });
     }
