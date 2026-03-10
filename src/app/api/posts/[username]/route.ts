@@ -15,7 +15,7 @@ export async function GET(
   }
 
   try {
-    const { posts, nextMaxId } = fetchPosts(username, maxId);
+    const { posts, nextMaxId } = await fetchPosts(username, maxId);
     return NextResponse.json({ posts, nextMaxId });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

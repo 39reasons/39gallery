@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { igWebFetch } from "@/lib/ig-web";
+import { IgComment, IgCommentsResponse } from "@/types/instagram-api";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapComment(c: any) {
+function mapComment(c: IgComment) {
   return {
     id: String(c.pk),
     username: c.user?.username ?? "",
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       url = `https://www.instagram.com/api/v1/media/${mediaId}/comments/?can_support_threading=true`;
     }
 
-    const json = await igWebFetch(url);
+    const json = (await igWebFetch(url)) as unknown as IgCommentsResponse;
 
     if (json.status !== "ok") {
       return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });

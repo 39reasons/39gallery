@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
-import { X, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import type { WeversePost } from "@/types/instagram";
+import { LightboxShell } from "./LightboxShell";
 
 interface DMLightboxProps {
   post: WeversePost;
@@ -14,11 +15,6 @@ interface DMLightboxProps {
 export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Reset carousel index when post changes
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [post.id]);
-
   const handlePrevImage = useCallback(() => {
     setCurrentIndex((i) => (i > 0 ? i - 1 : post.imageUrls.length - 1));
   }, [post.imageUrls.length]);
@@ -27,21 +23,15 @@ export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightbox
     setCurrentIndex((i) => (i < post.imageUrls.length - 1 ? i + 1 : 0));
   }, [post.imageUrls.length]);
 
+  // Carousel keyboard shortcuts (Shift+Arrow)
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
       if (e.key === "ArrowLeft" && e.shiftKey) handlePrevImage();
-      else if (e.key === "ArrowRight" && e.shiftKey) handleNextImage();
-      else if (e.key === "ArrowLeft") onPrevPost?.();
-      else if (e.key === "ArrowRight") onNextPost?.();
+      if (e.key === "ArrowRight" && e.shiftKey) handleNextImage();
     }
     document.addEventListener("keydown", onKeyDown);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = "";
-    };
-  }, [onClose, handlePrevImage, handleNextImage, onPrevPost, onNextPost]);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [handlePrevImage, handleNextImage]);
 
   const date = new Date(post.timestamp * 1000).toLocaleDateString("en-US", {
     year: "numeric",
@@ -50,79 +40,11 @@ export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightbox
   });
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
-      onClick={onClose}
-    >
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 text-white/80 hover:text-white p-2 z-10"
-        aria-label="Close"
-      >
-        <X className="h-6 w-6" />
-      </button>
-
-      {onPrevPost && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onPrevPost(); }}
-          className="absolute left-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-2 z-10"
-          aria-label="Previous post"
-        >
-          <ChevronLeft className="h-8 w-8" />
-        </button>
-      )}
-      {onNextPost && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onNextPost(); }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-2 z-10"
-          aria-label="Next post"
-        >
-          <ChevronRight className="h-8 w-8" />
-        </button>
-      )}
-
-      <div
-        className="relative max-w-5xl w-full mx-4 flex flex-col md:flex-row bg-card rounded-lg overflow-hidden max-h-[90vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Image */}
-        <div className="relative flex-1 min-h-0 bg-black flex items-center justify-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={post.imageUrls[currentIndex]}
-            alt={`Weverse DM from ${post.memberName}`}
-            className="max-h-[70vh] md:max-h-[85vh] w-full object-contain"
-            referrerPolicy="no-referrer"
-          />
-          {post.imageUrls.length > 1 && (
-            <>
-              <button
-                onClick={handlePrevImage}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                onClick={handleNextImage}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                {post.imageUrls.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      i === currentIndex ? "bg-white" : "bg-white/40"
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Info panel */}
+    <LightboxShell
+      onClose={onClose}
+      onPrevPost={onPrevPost}
+      onNextPost={onNextPost}
+      sidebar={
         <div className="md:w-80 p-4 flex flex-col gap-3 overflow-y-auto max-h-[30vh] md:max-h-none">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold">{post.memberName}</span>
@@ -146,7 +68,44 @@ export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightbox
             View on X
           </a>
         </div>
+      }
+    >
+      {/* Image */}
+      <div className="relative flex-1 min-h-0 bg-black flex items-center justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={post.imageUrls[currentIndex]}
+          alt={`Weverse DM from ${post.memberName}`}
+          className="max-h-[70vh] md:max-h-[85vh] w-full object-contain"
+          referrerPolicy="no-referrer"
+        />
+        {post.imageUrls.length > 1 && (
+          <>
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button
+              onClick={handleNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              {post.imageUrls.map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    i === currentIndex ? "bg-white" : "bg-white/40"
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </LightboxShell>
   );
 }

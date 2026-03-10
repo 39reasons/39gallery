@@ -14,7 +14,7 @@ export async function GET(
   }
 
   try {
-    const posts = fetchWeversePosts(member as MemberKey);
+    const posts = await fetchWeversePosts(member as MemberKey);
     return NextResponse.json({ posts });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";

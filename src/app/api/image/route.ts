@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const MAX_RESPONSE_SIZE = 100 * 1024 * 1024; // 100 MB
+
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get("url");
   if (!url) {
@@ -29,6 +31,7 @@ export async function GET(request: NextRequest) {
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
     },
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!response.ok) {
@@ -36,6 +39,14 @@ export async function GET(request: NextRequest) {
   }
 
   const contentType = response.headers.get("content-type") ?? "image/jpeg";
+  if (!contentType.startsWith("image/") && !contentType.startsWith("video/")) {
+    return NextResponse.json({ error: "Invalid content type" }, { status: 400 });
+  }
+
+  const contentLength = response.headers.get("content-length");
+  if (contentLength && parseInt(contentLength, 10) > MAX_RESPONSE_SIZE) {
+    return NextResponse.json({ error: "Response too large" }, { status: 413 });
+  }
 
   return new NextResponse(response.body, {
     headers: {

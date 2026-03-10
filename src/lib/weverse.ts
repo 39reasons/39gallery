@@ -1,4 +1,3 @@
-import { execSync } from "child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join } from "path";
 import { MemberKey, WeversePost, WEVERSE_MEMBER_PATTERNS, MEMBERS } from "@/types/instagram";
@@ -38,14 +37,14 @@ interface RssItem {
   link: string;
 }
 
-function fetchRss(): string | null {
+async function fetchRss(): Promise<string | null> {
   for (const url of RSS_SOURCES) {
     try {
-      const stdout = execSync(
-        `curl -sL "${url}" -H "User-Agent: ${USER_AGENT}"`,
-        { timeout: 15000 }
-      );
-      const xml = stdout.toString();
+      const res = await fetch(url, {
+        headers: { "User-Agent": USER_AGENT },
+        signal: AbortSignal.timeout(15000),
+      });
+      const xml = await res.text();
       if (xml.includes("<item>")) return xml;
     } catch {
       continue;
@@ -121,11 +120,11 @@ function tweetUrlFromLink(nitterLink: string): string {
 
 // --- Merge RSS into cache ---
 
-function fetchAndMerge(): WeversePost[] {
+async function fetchAndMerge(): Promise<WeversePost[]> {
   const cached = loadCache();
   const cachedIds = new Set(cached.map((p) => p.id));
 
-  const xml = fetchRss();
+  const xml = await fetchRss();
   if (!xml) return cached;
 
   const items = parseRssItems(xml);
@@ -163,8 +162,8 @@ function fetchAndMerge(): WeversePost[] {
 
 // --- Public API ---
 
-export function fetchWeversePosts(memberKey: MemberKey): WeversePost[] {
-  const allPosts = fetchAndMerge();
+export async function fetchWeversePosts(memberKey: MemberKey): Promise<WeversePost[]> {
+  const allPosts = await fetchAndMerge();
 
   if (memberKey === "le_sserafim") return allPosts;
 
