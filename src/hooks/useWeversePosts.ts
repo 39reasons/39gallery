@@ -29,7 +29,7 @@ export function useWeversePosts(memberKey: MemberKey) {
       setError(err instanceof Error ? err.message : "Failed to fetch DM updates");
       setPosts([]);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }, []);
 

@@ -42,7 +42,7 @@ export function useInstagramPosts(memberKey: MemberKey) {
       setError(err instanceof Error ? err.message : "Failed to fetch posts");
       setPosts([]);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }, []);
 
@@ -72,8 +72,10 @@ export function useInstagramPosts(memberKey: MemberKey) {
       failCountRef.current += 1;
       console.error("[load-more]", err instanceof Error ? err.message : err);
     } finally {
-      loadingMoreRef.current = false;
-      setLoadingMore(false);
+      if (!controller.signal.aborted) {
+        loadingMoreRef.current = false;
+        setLoadingMore(false);
+      }
     }
   }, [memberKey]);
 
