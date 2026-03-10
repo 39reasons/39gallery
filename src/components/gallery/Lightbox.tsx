@@ -174,7 +174,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
           <time className="text-xs text-muted-foreground">{date}</time>
           {post.caption && (
             <div>
-              <p className="text-sm leading-relaxed whitespace-pre-line">
+              <p className="text-sm leading-relaxed whitespace-pre-line break-words">
                 {captionTranslate.displayText}
               </p>
               {captionTranslateButton}

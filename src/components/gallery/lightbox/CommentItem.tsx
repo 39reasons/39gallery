@@ -52,7 +52,7 @@ function ReplyItem({ reply }: { reply: Comment }) {
       <div className="min-w-0">
         <div>
           <span className="font-semibold break-all">{reply.username}</span>{" "}
-          <span className="text-muted-foreground">{displayText}</span>
+          <span className="text-muted-foreground break-words">{displayText}</span>
         </div>
         <div className="flex items-center gap-3 mt-0.5">
           <span className="text-xs text-muted-foreground/60">{timeAgo(reply.createdAt)}</span>
@@ -114,7 +114,7 @@ export const CommentItem = memo(function CommentItem({ comment, mediaId }: { com
         <div className="min-w-0">
           <div>
             <span className="font-semibold break-all">{comment.username}</span>{" "}
-            <span className="text-muted-foreground">{displayText}</span>
+            <span className="text-muted-foreground break-words">{displayText}</span>
           </div>
           <div className="flex items-center gap-3 mt-0.5">
             <span className="text-xs text-muted-foreground/60">{timeAgo(comment.createdAt)}</span>

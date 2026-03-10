@@ -46,7 +46,7 @@ export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightbox
           </div>
           <time className="text-xs text-muted-foreground">{date}</time>
           {post.tweetText && (
-            <p className="text-sm leading-relaxed whitespace-pre-line">
+            <p className="text-sm leading-relaxed whitespace-pre-line break-words">
               {post.tweetText}
             </p>
           )}
