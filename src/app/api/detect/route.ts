@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GTranslateResponse } from "@/types/google-translate";
+import { rateLimit } from "@/lib/rate-limit";
 
 const NON_LATIN_RE = /[\u0400-\u04FF\u0500-\u052F\u0600-\u06FF\u0900-\u097F\u0E00-\u0E7F\u1100-\u11FF\u3000-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]/u;
 
@@ -12,6 +13,11 @@ function hasNonLatinScript(text: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  const { success } = rateLimit(request, { limit: 30, windowMs: 60_000 });
+  if (!success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const body = await request.json();
   const texts: unknown = body?.texts;
 

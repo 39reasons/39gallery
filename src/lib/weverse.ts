@@ -1,5 +1,6 @@
-import { readFileSync, writeFileSync, mkdirSync } from "fs";
+import { readFile, writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { XMLParser } from "fast-xml-parser";
 import { MemberKey, WeversePost, WEVERSE_MEMBER_PATTERNS, MEMBERS } from "@/types/instagram";
 
 const USER_AGENT =
@@ -12,19 +13,25 @@ const RSS_SOURCES = [
 const CACHE_DIR = join(process.cwd(), ".cache", "weverse");
 const CACHE_FILE = join(CACHE_DIR, "posts.json");
 
+const xmlParser = new XMLParser({
+  ignoreAttributes: false,
+  processEntities: true,
+});
+
 // --- Cache ---
 
-function loadCache(): WeversePost[] {
+async function loadCache(): Promise<WeversePost[]> {
   try {
-    return JSON.parse(readFileSync(CACHE_FILE, "utf-8")) as WeversePost[];
+    const data = await readFile(CACHE_FILE, "utf-8");
+    return JSON.parse(data) as WeversePost[];
   } catch {
     return [];
   }
 }
 
-function saveCache(posts: WeversePost[]): void {
-  mkdirSync(CACHE_DIR, { recursive: true });
-  writeFileSync(CACHE_FILE, JSON.stringify(posts, null, 2));
+async function saveCache(posts: WeversePost[]): Promise<void> {
+  await mkdir(CACHE_DIR, { recursive: true });
+  await writeFile(CACHE_FILE, JSON.stringify(posts, null, 2));
 }
 
 // --- RSS fetching ---
@@ -54,22 +61,25 @@ async function fetchRss(): Promise<string | null> {
 }
 
 function parseRssItems(xml: string): RssItem[] {
-  const items: RssItem[] = [];
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match;
+  const parsed = xmlParser.parse(xml);
+  const rawItems = parsed?.rss?.channel?.item;
+  if (!rawItems) return [];
 
-  while ((match = itemRegex.exec(xml)) !== null) {
-    const block = match[1] ?? "";
-    const title = block.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? "";
-    const description = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/)?.[1] ?? "";
-    const pubDate = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1] ?? "";
-    const guid = block.match(/<guid[^>]*>([\s\S]*?)<\/guid>/)?.[1] ?? "";
-    const link = block.match(/<link>([\s\S]*?)<\/link>/)?.[1] ?? "";
+  const arr: unknown[] = Array.isArray(rawItems) ? rawItems : [rawItems];
+  return arr.map((item) => {
+    const obj = item as Record<string, unknown>;
+    const guid = typeof obj.guid === "object" && obj.guid !== null
+      ? String((obj.guid as Record<string, unknown>)["#text"] ?? "")
+      : String(obj.guid ?? "");
 
-    items.push({ title, description, pubDate, guid, link });
-  }
-
-  return items;
+    return {
+      title: String(obj.title ?? ""),
+      description: String(obj.description ?? ""),
+      pubDate: String(obj.pubDate ?? ""),
+      guid,
+      link: String(obj.link ?? ""),
+    };
+  });
 }
 
 function isWeverseDm(text: string): boolean {
@@ -121,7 +131,7 @@ function tweetUrlFromLink(nitterLink: string): string {
 // --- Merge RSS into cache ---
 
 async function fetchAndMerge(): Promise<WeversePost[]> {
-  const cached = loadCache();
+  const cached = await loadCache();
   const cachedIds = new Set(cached.map((p) => p.id));
 
   const xml = await fetchRss();
@@ -154,7 +164,7 @@ async function fetchAndMerge(): Promise<WeversePost[]> {
 
   if (added) {
     cached.sort((a, b) => b.timestamp - a.timestamp);
-    saveCache(cached);
+    await saveCache(cached);
   }
 
   return cached;

@@ -10,6 +10,7 @@ export function Avatar({ src, username }: { src: string; username: string }) {
       alt={username}
       className="h-6 w-6 rounded-full object-cover shrink-0"
       referrerPolicy="no-referrer"
+      loading="lazy"
     />
   );
 }

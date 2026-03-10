@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ comments });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[comments]", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
   }
 }
