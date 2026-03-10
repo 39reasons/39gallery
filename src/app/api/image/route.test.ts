@@ -66,6 +66,20 @@ describe("GET /api/image", () => {
     expect(data.error).toBe("Invalid URL");
   });
 
+  it("returns 400 when URL exceeds max length", async () => {
+    const res = await GET(makeRequest({ url: "https://nitter.net/" + "a".repeat(2048) }));
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toBe("URL too long");
+  });
+
+  it("returns 400 for non-HTTPS URL", async () => {
+    const res = await GET(makeRequest({ url: "http://nitter.net/img.jpg" }));
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toBe("Only HTTPS URLs are allowed");
+  });
+
   it("returns 400 for disallowed hostname", async () => {
     const res = await GET(makeRequest({ url: "https://evil.com/image.jpg" }));
     expect(res.status).toBe(400);
@@ -108,12 +122,16 @@ describe("GET /api/image", () => {
     globalThis.fetch = vi.fn().mockRejectedValue(new Error("timeout"));
     const res = await GET(makeRequest({ url: "https://nitter.net/img.jpg" }));
     expect(res.status).toBe(502);
+    const data = await res.json();
+    expect(data.error).toBe("Upstream fetch failed");
   });
 
   it("returns upstream status when response is not ok", async () => {
     globalThis.fetch = mockUpstream({ ok: false, status: 404 });
     const res = await GET(makeRequest({ url: "https://nitter.net/img.jpg" }));
     expect(res.status).toBe(404);
+    const data = await res.json();
+    expect(data.error).toBe("Upstream returned an error");
   });
 
   it("returns 400 for non-media content type", async () => {
@@ -170,12 +188,13 @@ describe("GET /api/image", () => {
     expect(data.error).toBe("Missing content length");
   });
 
-  it("sets Cache-Control and Content-Type headers on success", async () => {
+  it("sets Cache-Control, Content-Type, and Content-Disposition headers on success", async () => {
     globalThis.fetch = mockUpstream();
     const res = await GET(makeRequest({ url: "https://nitter.net/img.jpg" }));
     expect(res.headers.get("Cache-Control")).toBe("public, max-age=86400");
     expect(res.headers.get("Content-Type")).toBe("image/jpeg");
     expect(res.headers.get("Content-Length")).toBe("1024");
+    expect(res.headers.get("Content-Disposition")).toBe("inline");
   });
 
   it("forwards range request header to upstream", async () => {

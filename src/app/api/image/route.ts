@@ -16,8 +16,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
   }
 
+  if (url.length > 2048) {
+    return NextResponse.json({ error: "URL too long" }, { status: 400 });
+  }
+
   try {
     const parsed = new URL(url);
+    if (parsed.protocol !== "https:") {
+      return NextResponse.json({ error: "Only HTTPS URLs are allowed" }, { status: 400 });
+    }
     const allowedSuffixes = [
       ".cdninstagram.com",
       ".fbcdn.net",
@@ -51,12 +58,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("[image-proxy] upstream fetch failed:", error instanceof Error ? error.message : error);
-    return new NextResponse(null, { status: 502 });
+    return NextResponse.json({ error: "Upstream fetch failed" }, { status: 502 });
   }
 
   if (!response.ok && response.status !== 206) {
     response.body?.cancel();
-    return new NextResponse(null, { status: response.status });
+    return NextResponse.json({ error: "Upstream returned an error" }, { status: response.status });
   }
 
   const contentType = response.headers.get("content-type");
@@ -82,6 +89,7 @@ export async function GET(request: NextRequest) {
 
   const responseHeaders: Record<string, string> = {
     "Content-Type": contentType,
+    "Content-Disposition": "inline",
     "Cache-Control": "public, max-age=86400",
     "Accept-Ranges": "bytes",
   };
