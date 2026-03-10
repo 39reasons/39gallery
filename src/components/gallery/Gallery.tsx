@@ -35,6 +35,11 @@ export function Gallery() {
   } = useWeversePosts(selected);
 
   useEffect(() => {
+    setLightboxIndex(null);
+    setDmLightboxIndex(null);
+  }, [viewMode, selected]);
+
+  useEffect(() => {
     if (lightboxIndex !== null && lightboxIndex >= igPosts.length) {
       setLightboxIndex(null);
     }
