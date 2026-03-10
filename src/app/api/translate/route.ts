@@ -7,14 +7,21 @@ const ALLOWED_TARGETS = new Set([
 ]);
 const MAX_TEXT_LENGTH = 5000;
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const { success } = rateLimit(request, { limit: 60, windowMs: 60_000 });
   if (!success) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": "60" } });
   }
 
-  const text = request.nextUrl.searchParams.get("text");
-  const target = request.nextUrl.searchParams.get("target") ?? "en";
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const text = typeof body?.text === "string" ? body.text : "";
+  const target = typeof body?.target === "string" && body.target ? body.target : "en";
 
   if (!text) {
     return NextResponse.json({ error: "Text is required" }, { status: 400 });

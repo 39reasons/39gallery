@@ -70,6 +70,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Response too large" }, { status: 413 });
   }
 
+  // Reject responses without content-length to prevent unbounded streaming
+  if (!contentLength && !rangeHeader) {
+    return NextResponse.json({ error: "Missing content length" }, { status: 502 });
+  }
+
   const responseHeaders: Record<string, string> = {
     "Content-Type": contentType,
     "Cache-Control": "public, max-age=86400",
