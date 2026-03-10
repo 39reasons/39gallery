@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       try {
         const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`;
         const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-        if (!res.ok) return "unknown";
+        if (!res.ok) { res.body?.cancel(); return "unknown"; }
         const data = (await res.json()) as GTranslateResponse;
         const detected = data?.[2];
         if (typeof detected !== "string") return "unknown";
