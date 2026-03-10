@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir } from "fs/promises";
+import { readFile, writeFile, rename, mkdir } from "fs/promises";
 import { join } from "path";
 import { XMLParser } from "fast-xml-parser";
 import { MemberKey, WeversePost, WEVERSE_MEMBER_PATTERNS, MEMBERS } from "@/types/instagram";
@@ -28,9 +28,12 @@ async function loadCache(): Promise<WeversePost[]> {
   }
 }
 
+const CACHE_TMP_FILE = join(CACHE_DIR, "posts.json.tmp");
+
 async function saveCache(posts: WeversePost[]): Promise<void> {
   await mkdir(CACHE_DIR, { recursive: true });
-  await writeFile(CACHE_FILE, JSON.stringify(posts, null, 2));
+  await writeFile(CACHE_TMP_FILE, JSON.stringify(posts, null, 2));
+  await rename(CACHE_TMP_FILE, CACHE_FILE);
 }
 
 // --- RSS fetching ---

@@ -77,7 +77,7 @@ export async function fetchPosts(username: string, maxId?: string): Promise<{ po
     throw new Error(`Instagram returned no items for ${username}`);
   }
 
-  const nextMaxId = json.next_max_id ? String(json.next_max_id) : undefined;
+  const nextMaxId = json.next_max_id != null ? String(json.next_max_id) : undefined;
 
   const posts: InstagramPost[] = json.items.map((item: IgFeedItem) => {
     const caption = item.caption?.text ?? "";
