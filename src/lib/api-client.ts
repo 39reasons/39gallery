@@ -12,7 +12,10 @@ export async function apiFetch<T>(
   url: string,
   options?: RequestInit,
 ): Promise<T> {
-  const res = await fetch(url, options);
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(15000),
+    ...options,
+  });
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     try {
