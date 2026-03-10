@@ -32,7 +32,7 @@ export function useInstagramPosts(memberKey: MemberKey) {
       const data = await apiFetch<PostsResponse>(`/api/posts/${member.username}`, {
         signal: controller.signal,
       });
-      setPosts(data.posts);
+      setPosts(Array.isArray(data.posts) ? data.posts : []);
       nextMaxIdRef.current = data.nextMaxId;
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
@@ -54,7 +54,8 @@ export function useInstagramPosts(memberKey: MemberKey) {
       const data = await apiFetch<PostsResponse>(
         `/api/posts/${member.username}?max_id=${nextMaxIdRef.current}`,
       );
-      setPosts((prev) => [...prev, ...data.posts]);
+      const newPosts = Array.isArray(data.posts) ? data.posts : [];
+      setPosts((prev) => [...prev, ...newPosts]);
       nextMaxIdRef.current = data.nextMaxId;
     } catch (err) {
       console.error("[load-more]", err instanceof Error ? err.message : err);

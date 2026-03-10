@@ -28,7 +28,7 @@ export function MemberTabs({ selected, onSelect }: MemberTabsProps) {
   };
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label="Members">
+    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none" role="tablist" aria-label="Members" aria-orientation="horizontal">
       {MEMBERS.map((member, i) => (
         <button
           key={member.key}

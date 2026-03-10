@@ -23,7 +23,7 @@ export function useWeversePosts(memberKey: MemberKey) {
       const data = await apiFetch<WeverseResponse>(`/api/weverse/${key}`, {
         signal: controller.signal,
       });
-      setPosts(data.posts);
+      setPosts(Array.isArray(data.posts) ? data.posts : []);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       setError(err instanceof Error ? err.message : "Failed to fetch DM updates");
