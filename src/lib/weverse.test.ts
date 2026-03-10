@@ -51,6 +51,16 @@ describe("extractImageUrls", () => {
   it("returns empty array for empty string", () => {
     expect(extractImageUrls("")).toEqual([]);
   });
+
+  it("decodes HTML entities in URLs", () => {
+    const html = '<img src="https://pbs.twimg.com/media/img.jpg?name=orig&amp;format=jpg" />';
+    expect(extractImageUrls(html)).toEqual(["https://pbs.twimg.com/media/img.jpg?name=orig&format=jpg"]);
+  });
+
+  it("decodes &quot; entities in URLs", () => {
+    const html = '<img src="https://example.com/img.jpg?q=hello&amp;v=1" />';
+    expect(extractImageUrls(html)).toEqual(["https://example.com/img.jpg?q=hello&v=1"]);
+  });
 });
 
 describe("stripHtml", () => {

@@ -8,6 +8,7 @@ import { PhotoGrid } from "./PhotoGrid";
 import { Lightbox } from "./Lightbox";
 import { DMGrid } from "./DMGrid";
 import { DMLightbox } from "./DMLightbox";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { MemberKey, ViewMode } from "@/types/instagram";
 import { useInstagramPosts } from "@/hooks/useInstagramPosts";
 import { useWeversePosts } from "@/hooks/useWeversePosts";
@@ -113,24 +114,28 @@ export function Gallery() {
       )}
 
       {lightboxIndex !== null && igPosts[lightboxIndex] && (
-        <Lightbox
-          key={igPosts[lightboxIndex].id}
-          post={igPosts[lightboxIndex]}
-          onClose={handleCloseLightbox}
-          onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex(lightboxIndex - 1) : undefined}
-          onNextPost={lightboxIndex < igPosts.length - 1 ? () => setLightboxIndex(lightboxIndex + 1) : undefined}
-          onLikeToggle={handleLikeToggle}
-        />
+        <ErrorBoundary resetKey={igPosts[lightboxIndex].id}>
+          <Lightbox
+            key={igPosts[lightboxIndex].id}
+            post={igPosts[lightboxIndex]}
+            onClose={handleCloseLightbox}
+            onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex(lightboxIndex - 1) : undefined}
+            onNextPost={lightboxIndex < igPosts.length - 1 ? () => setLightboxIndex(lightboxIndex + 1) : undefined}
+            onLikeToggle={handleLikeToggle}
+          />
+        </ErrorBoundary>
       )}
 
       {dmLightboxIndex !== null && wvPosts[dmLightboxIndex] && (
-        <DMLightbox
-          key={wvPosts[dmLightboxIndex].id}
-          post={wvPosts[dmLightboxIndex]}
-          onClose={handleCloseDmLightbox}
-          onPrevPost={dmLightboxIndex > 0 ? () => setDmLightboxIndex(dmLightboxIndex - 1) : undefined}
-          onNextPost={dmLightboxIndex < wvPosts.length - 1 ? () => setDmLightboxIndex(dmLightboxIndex + 1) : undefined}
-        />
+        <ErrorBoundary resetKey={wvPosts[dmLightboxIndex].id}>
+          <DMLightbox
+            key={wvPosts[dmLightboxIndex].id}
+            post={wvPosts[dmLightboxIndex]}
+            onClose={handleCloseDmLightbox}
+            onPrevPost={dmLightboxIndex > 0 ? () => setDmLightboxIndex(dmLightboxIndex - 1) : undefined}
+            onNextPost={dmLightboxIndex < wvPosts.length - 1 ? () => setDmLightboxIndex(dmLightboxIndex + 1) : undefined}
+          />
+        </ErrorBoundary>
       )}
     </section>
   );
