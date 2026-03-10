@@ -182,10 +182,11 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
           )}
 
           {/* Comments */}
-          <div className="border-t pt-3 mt-1">
+          <div className="border-t pt-3 mt-1" aria-live="polite">
             {commentsLoading ? (
-              <div className="flex justify-center py-2">
+              <div className="flex justify-center py-2" role="status">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <span className="sr-only">Loading comments</span>
               </div>
             ) : commentsError ? (
               <div className="text-center py-2">
@@ -222,6 +223,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
             controls
             autoPlay
             playsInline
+            title="Post video"
             className="max-h-[70vh] md:max-h-[85vh] w-full object-contain"
           />
         ) : (

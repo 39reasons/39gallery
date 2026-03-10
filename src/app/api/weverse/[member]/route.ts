@@ -15,7 +15,9 @@ export async function GET(
 
   try {
     const posts = await fetchWeversePosts(member as MemberKey);
-    return NextResponse.json({ posts });
+    return NextResponse.json({ posts }, {
+      headers: { "Cache-Control": "private, max-age=300" },
+    });
   } catch (error) {
     console.error("[weverse]", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Failed to fetch DM updates" }, { status: 500 });
