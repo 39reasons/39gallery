@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { fetchWeversePosts } from "@/lib/weverse";
 import { isMemberKey } from "@/types/instagram";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ member: string }> }
 ) {
   const { success } = rateLimit(request, { limit: 30, windowMs: 60_000 });

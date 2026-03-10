@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { NextRequest } from "next/server";
 
 vi.mock("@/lib/rate-limit", () => ({
   rateLimit: () => ({ success: true, remaining: 100 }),
@@ -11,9 +12,9 @@ vi.mock("@/lib/weverse", () => ({
 
 const { GET } = await import("./route");
 
-function makeRequest(member: string): [Request, { params: Promise<{ member: string }> }] {
+function makeRequest(member: string): [NextRequest, { params: Promise<{ member: string }> }] {
   return [
-    new Request(`http://localhost/api/weverse/${member}`),
+    new NextRequest(`http://localhost/api/weverse/${member}`),
     { params: Promise.resolve({ member }) },
   ];
 }
