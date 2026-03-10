@@ -88,11 +88,11 @@ function parseRssItems(xml: string): RssItem[] {
   });
 }
 
-function isWeverseDm(text: string): boolean {
+export function isWeverseDm(text: string): boolean {
   return /weverse\s*(dm|message|update)/i.test(text);
 }
 
-function extractImageUrls(html: string): string[] {
+export function extractImageUrls(html: string): string[] {
   const urls: string[] = [];
   const imgRegex = /<img\s+src="([^"]+)"/g;
   let match;
@@ -111,7 +111,7 @@ function proxyUrl(url: string): string {
   return `/api/image?url=${encodeURIComponent(url)}`;
 }
 
-function stripHtml(html: string): string {
+export function stripHtml(html: string): string {
   return html
     .replace(/<br\s*\/?>/g, "\n")
     .replace(/<a[^>]*>([^<]*)<\/a>/g, "$1")
@@ -123,7 +123,7 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-function detectMember(text: string): { key: MemberKey; name: string } | null {
+export function detectMember(text: string): { key: MemberKey; name: string } | null {
   for (const [key, pattern] of Object.entries(WEVERSE_MEMBER_PATTERNS)) {
     if (pattern.test(text)) {
       const member = MEMBERS.find((m) => m.key === key);
@@ -133,7 +133,7 @@ function detectMember(text: string): { key: MemberKey; name: string } | null {
   return null;
 }
 
-function tweetUrlFromLink(nitterLink: string): string {
+export function tweetUrlFromLink(nitterLink: string): string {
   return nitterLink
     .replace(/https:\/\/nitter\.net/, "https://x.com")
     .replace(/#m$/, "");
