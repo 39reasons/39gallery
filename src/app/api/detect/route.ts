@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!Array.isArray(texts)) {
-    return NextResponse.json({ error: "texts must be an array" }, { status: 400 });
+    return NextResponse.json({ error: "Texts must be an array" }, { status: 400 });
   }
 
   if (texts.length === 0) {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (texts.length > MAX_TEXTS) {
-    return NextResponse.json({ error: "too many texts" }, { status: 400 });
+    return NextResponse.json({ error: "Too many texts" }, { status: 400 });
   }
 
   const validTexts = texts.map((t) => (typeof t === "string" ? t.slice(0, MAX_TEXT_LENGTH) : ""));

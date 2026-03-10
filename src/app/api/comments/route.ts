@@ -27,11 +27,11 @@ export async function GET(request: NextRequest) {
   const parentId = request.nextUrl.searchParams.get("parentId");
 
   if (!mediaId || !NUMERIC_ID.test(mediaId)) {
-    return NextResponse.json({ error: "valid mediaId is required" }, { status: 400 });
+    return NextResponse.json({ error: "Valid mediaId is required" }, { status: 400 });
   }
 
   if (parentId && !NUMERIC_ID.test(parentId)) {
-    return NextResponse.json({ error: "invalid parentId" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid parentId" }, { status: 400 });
   }
 
   try {
@@ -51,7 +51,9 @@ export async function GET(request: NextRequest) {
     const raw = parentId ? json.child_comments : json.comments;
     const comments = (raw ?? []).map(mapComment);
 
-    return NextResponse.json({ comments });
+    return NextResponse.json({ comments }, {
+      headers: { "Cache-Control": "private, no-store" },
+    });
   } catch (error) {
     console.error("[comments]", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
