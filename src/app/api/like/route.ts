@@ -51,7 +51,8 @@ export async function POST(request: NextRequest) {
     let json: Record<string, unknown>;
     try {
       json = (await res.json()) as Record<string, unknown>;
-    } catch {
+    } catch (err) {
+      console.error("[like] Failed to parse response:", err instanceof Error ? err.message : err);
       return NextResponse.json({ error: "Like action failed" }, { status: 500 });
     }
 
