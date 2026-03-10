@@ -42,6 +42,11 @@ export async function POST(request: Request) {
       signal: AbortSignal.timeout(15000),
     });
 
+    if (!res.ok) {
+      console.error("[like]", `Instagram returned ${res.status}`);
+      return NextResponse.json({ error: "Like action failed" }, { status: 400 });
+    }
+
     const json = (await res.json()) as Record<string, unknown>;
 
     if (json?.status !== "ok") {
