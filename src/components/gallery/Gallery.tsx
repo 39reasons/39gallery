@@ -85,8 +85,8 @@ export function Gallery() {
           key={igPosts[lightboxIndex].id}
           post={igPosts[lightboxIndex]}
           onClose={() => setLightboxIndex(null)}
-          onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex((i) => (i ?? 0) - 1) : undefined}
-          onNextPost={lightboxIndex < igPosts.length - 1 ? () => setLightboxIndex((i) => (i ?? 0) + 1) : undefined}
+          onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex(lightboxIndex - 1) : undefined}
+          onNextPost={lightboxIndex < igPosts.length - 1 ? () => setLightboxIndex(lightboxIndex + 1) : undefined}
           onLikeToggle={(postId, liked) => {
             updatePost(postId, (p) => ({
               ...p,
@@ -102,8 +102,8 @@ export function Gallery() {
           key={wvPosts[dmLightboxIndex].id}
           post={wvPosts[dmLightboxIndex]}
           onClose={() => setDmLightboxIndex(null)}
-          onPrevPost={dmLightboxIndex > 0 ? () => setDmLightboxIndex((i) => (i ?? 0) - 1) : undefined}
-          onNextPost={dmLightboxIndex < wvPosts.length - 1 ? () => setDmLightboxIndex((i) => (i ?? 0) + 1) : undefined}
+          onPrevPost={dmLightboxIndex > 0 ? () => setDmLightboxIndex(dmLightboxIndex - 1) : undefined}
+          onNextPost={dmLightboxIndex < wvPosts.length - 1 ? () => setDmLightboxIndex(dmLightboxIndex + 1) : undefined}
         />
       )}
     </div>

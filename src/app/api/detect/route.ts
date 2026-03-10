@@ -21,7 +21,11 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const texts: unknown = body?.texts;
 
-  if (!Array.isArray(texts) || texts.length === 0) {
+  if (!Array.isArray(texts)) {
+    return NextResponse.json({ error: "texts must be an array" }, { status: 400 });
+  }
+
+  if (texts.length === 0) {
     return NextResponse.json({ languages: [] });
   }
 

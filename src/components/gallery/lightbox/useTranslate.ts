@@ -44,6 +44,7 @@ export function useTranslateButton(text: string, lang?: string) {
     setLoading(true);
     try {
       const res = await fetch(`/api/translate?text=${encodeURIComponent(text)}`);
+      if (!res.ok) throw new Error("Translation request failed");
       const data = (await res.json()) as TranslateResponse;
       setTranslated(data.translated ?? "Translation failed");
       setShowing(true);
