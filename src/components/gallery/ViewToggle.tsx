@@ -25,11 +25,13 @@ export function ViewToggle({ mode, onModeChange }: ViewToggleProps) {
     else if (e.key === "Home") next = 0;
     else if (e.key === "End") next = MODES.length - 1;
 
-    const target = next !== null ? MODES[next] : undefined;
-    if (target) {
-      e.preventDefault();
-      tabsRef.current[next!]?.focus();
-      onModeChange(target.key);
+    if (next !== null) {
+      const target = MODES[next];
+      if (target) {
+        e.preventDefault();
+        tabsRef.current[next]?.focus();
+        onModeChange(target.key);
+      }
     }
   };
 
@@ -47,7 +49,7 @@ export function ViewToggle({ mode, onModeChange }: ViewToggleProps) {
             aria-selected={mode === m.key}
             tabIndex={mode === m.key ? 0 : -1}
             className={cn(
-              "flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors",
+              "flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2",
               mode === m.key
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"

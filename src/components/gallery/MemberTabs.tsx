@@ -19,11 +19,13 @@ export function MemberTabs({ selected, onSelect }: MemberTabsProps) {
     else if (e.key === "Home") next = 0;
     else if (e.key === "End") next = MEMBERS.length - 1;
 
-    const target = next !== null ? MEMBERS[next] : undefined;
-    if (target) {
-      e.preventDefault();
-      tabsRef.current[next!]?.focus();
-      onSelect(target.key);
+    if (next !== null) {
+      const target = MEMBERS[next];
+      if (target) {
+        e.preventDefault();
+        tabsRef.current[next]?.focus();
+        onSelect(target.key);
+      }
     }
   };
 
@@ -39,7 +41,7 @@ export function MemberTabs({ selected, onSelect }: MemberTabsProps) {
           aria-selected={selected === member.key}
           tabIndex={selected === member.key ? 0 : -1}
           className={cn(
-            "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors",
+            "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2",
             selected === member.key
               ? "bg-primary text-primary-foreground"
               : "bg-secondary text-secondary-foreground hover:bg-accent"
