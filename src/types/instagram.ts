@@ -21,14 +21,6 @@ export interface InstagramPost {
   ownerProfilePicUrl?: string;
 }
 
-export interface MemberProfile {
-  username: string;
-  displayName: string;
-  profilePicUrl?: string;
-  followerCount?: number;
-  postCount?: number;
-}
-
 export type MemberKey = "le_sserafim" | "chaewon" | "sakura" | "yunjin" | "kazuha" | "eunchae";
 
 export interface Member {
