@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     if (!res.ok) {
       res.body?.cancel();
       console.error("[like]", `Instagram returned ${res.status}`);
-      return NextResponse.json({ error: "Like action failed" }, { status: 400 });
+      return NextResponse.json({ error: "Like action failed" }, { status: 502 });
     }
 
     let json: Record<string, unknown>;

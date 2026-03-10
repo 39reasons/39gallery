@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
+import { WEB_UA } from "@/lib/ig-session";
 
 const MAX_IMAGE_SIZE = 15 * 1024 * 1024; // 15 MB
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
@@ -34,8 +35,7 @@ export async function GET(request: NextRequest) {
   }
 
   const upstreamHeaders: Record<string, string> = {
-    "User-Agent":
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "User-Agent": WEB_UA,
   };
 
   const rangeHeader = request.headers.get("range");
@@ -68,7 +68,8 @@ export async function GET(request: NextRequest) {
   const contentLength = response.headers.get("content-length");
   const isVideo = contentType.startsWith("video/");
   const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
-  if (contentLength && parseInt(contentLength, 10) > maxSize) {
+  const parsedSize = contentLength ? parseInt(contentLength, 10) : NaN;
+  if (contentLength && (isNaN(parsedSize) || parsedSize > maxSize)) {
     response.body?.cancel();
     return NextResponse.json({ error: "Response too large" }, { status: 413 });
   }
