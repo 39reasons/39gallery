@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { timeAgo } from "@/lib/time";
 import { Avatar } from "./Avatar";
@@ -70,7 +70,7 @@ function ReplyItem({ reply }: { reply: Comment }) {
 
 export { type Comment };
 
-export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: string }) {
+export const CommentItem = memo(function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: string }) {
   const [replies, setReplies] = useState<Comment[]>([]);
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -161,4 +161,4 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
       )}
     </div>
   );
-}
+});

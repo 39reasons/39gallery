@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Heart, MessageCircle, Play } from "lucide-react";
 import { InstagramPost } from "@/types/instagram";
 
@@ -14,7 +15,7 @@ function formatCount(n: number): string {
   return n.toString();
 }
 
-export function PhotoGrid({ posts, onSelect }: PhotoGridProps) {
+export const PhotoGrid = memo(function PhotoGrid({ posts, onSelect }: PhotoGridProps) {
   if (posts.length === 0) {
     return (
       <div className="text-center py-20 text-muted-foreground">
@@ -69,4 +70,4 @@ export function PhotoGrid({ posts, onSelect }: PhotoGridProps) {
       ))}
     </div>
   );
-}
+});

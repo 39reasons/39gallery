@@ -46,6 +46,25 @@ export function Gallery() {
     setDmLightboxIndex(null);
   }, []);
 
+  const handleSelectPost = useCallback((post: { id: string }) => {
+    setLightboxIndex(igPosts.findIndex((p) => p.id === post.id));
+  }, [igPosts]);
+
+  const handleSelectDmPost = useCallback((post: { id: string }) => {
+    setDmLightboxIndex(wvPosts.findIndex((p) => p.id === post.id));
+  }, [wvPosts]);
+
+  const handleCloseLightbox = useCallback(() => setLightboxIndex(null), []);
+  const handleCloseDmLightbox = useCallback(() => setDmLightboxIndex(null), []);
+
+  const handleLikeToggle = useCallback((postId: string, liked: boolean) => {
+    updatePost(postId, (p) => ({
+      ...p,
+      hasLiked: liked,
+      likeCount: p.likeCount + (liked ? 1 : -1),
+    }));
+  }, [updatePost]);
+
   const loading = viewMode === "instagram" ? igLoading : wvLoading;
   const error = viewMode === "instagram" ? igError : wvError;
   const retry = viewMode === "instagram" ? igRetry : wvRetry;
@@ -78,7 +97,7 @@ export function Gallery() {
 
       {!loading && !error && viewMode === "instagram" && (
         <>
-          <PhotoGrid posts={igPosts} onSelect={(post) => setLightboxIndex(igPosts.indexOf(post))} />
+          <PhotoGrid posts={igPosts} onSelect={handleSelectPost} />
           <div ref={sentinelRef} className="h-1" aria-hidden="true" />
           {loadingMore && (
             <div className="flex justify-center py-4" aria-live="polite">
@@ -90,23 +109,17 @@ export function Gallery() {
       )}
 
       {!loading && !error && viewMode === "weverse" && (
-        <DMGrid posts={wvPosts} onSelect={(post) => setDmLightboxIndex(wvPosts.indexOf(post))} />
+        <DMGrid posts={wvPosts} onSelect={handleSelectDmPost} />
       )}
 
       {lightboxIndex !== null && igPosts[lightboxIndex] && (
         <Lightbox
           key={igPosts[lightboxIndex].id}
           post={igPosts[lightboxIndex]}
-          onClose={() => setLightboxIndex(null)}
+          onClose={handleCloseLightbox}
           onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex(lightboxIndex - 1) : undefined}
           onNextPost={lightboxIndex < igPosts.length - 1 ? () => setLightboxIndex(lightboxIndex + 1) : undefined}
-          onLikeToggle={(postId, liked) => {
-            updatePost(postId, (p) => ({
-              ...p,
-              hasLiked: liked,
-              likeCount: p.likeCount + (liked ? 1 : -1),
-            }));
-          }}
+          onLikeToggle={handleLikeToggle}
         />
       )}
 
@@ -114,7 +127,7 @@ export function Gallery() {
         <DMLightbox
           key={wvPosts[dmLightboxIndex].id}
           post={wvPosts[dmLightboxIndex]}
-          onClose={() => setDmLightboxIndex(null)}
+          onClose={handleCloseDmLightbox}
           onPrevPost={dmLightboxIndex > 0 ? () => setDmLightboxIndex(dmLightboxIndex - 1) : undefined}
           onNextPost={dmLightboxIndex < wvPosts.length - 1 ? () => setDmLightboxIndex(dmLightboxIndex + 1) : undefined}
         />
