@@ -42,7 +42,10 @@ export function LightboxShell({ onClose, onPrevPost, onNextPost, children, sideb
         const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
           'button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"]):not(:disabled)'
         );
-        if (focusable.length === 0) return;
+        if (focusable.length === 0) {
+          e.preventDefault();
+          return;
+        }
         const first = focusable.item(0);
         const last = focusable.item(focusable.length - 1);
         if (!first || !last) return;

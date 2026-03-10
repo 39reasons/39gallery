@@ -27,7 +27,7 @@ async function igFetch<T>(url: string): Promise<T> {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Instagram API error ${res.status}: ${text.slice(0, 100)}`);
+    throw new Error(`Instagram API error ${res.status}: ${text.slice(0, 200)}`);
   }
 
   return res.json() as Promise<T>;
