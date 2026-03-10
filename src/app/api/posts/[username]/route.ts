@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchPosts } from "@/lib/instagram";
 import { MEMBERS } from "@/types/instagram";
 
+const MAX_ID_RE = /^[\w-]{1,60}$/;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ username: string }> }
@@ -12,6 +14,10 @@ export async function GET(
   const validUsernames = MEMBERS.map((m) => m.username);
   if (!validUsernames.includes(username)) {
     return NextResponse.json({ error: "Invalid username" }, { status: 400 });
+  }
+
+  if (maxId && !MAX_ID_RE.test(maxId)) {
+    return NextResponse.json({ error: "Invalid max_id" }, { status: 400 });
   }
 
   try {

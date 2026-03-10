@@ -22,6 +22,7 @@ export function DMGrid({ posts, onSelect }: DMGridProps) {
         <button
           key={post.id}
           onClick={() => onSelect(post)}
+          aria-label={`View Weverse DM from ${post.memberName}`}
           className="relative aspect-[3/4] group overflow-hidden bg-muted rounded-md"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}

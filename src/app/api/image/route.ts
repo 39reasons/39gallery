@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const MAX_RESPONSE_SIZE = 100 * 1024 * 1024; // 100 MB
+const MAX_RESPONSE_SIZE = 15 * 1024 * 1024; // 15 MB
 
 export async function GET(request: NextRequest) {
   const url = request.nextUrl.searchParams.get("url");

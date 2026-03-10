@@ -61,8 +61,8 @@ export function Gallery() {
       if (!res.ok) throw new Error(data.error ?? "Failed to fetch posts");
       setPosts((prev) => [...prev, ...data.posts]);
       nextMaxIdRef.current = data.nextMaxId;
-    } catch {
-      // silently fail on load-more
+    } catch (err) {
+      console.error("[load-more]", err instanceof Error ? err.message : err);
     } finally {
       loadingMoreRef.current = false;
       setLoadingMore(false);
@@ -110,7 +110,7 @@ export function Gallery() {
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [viewMode, loading, fetchMorePosts]);
+  }, [viewMode, fetchMorePosts]);
 
   return (
     <div className="space-y-6">
