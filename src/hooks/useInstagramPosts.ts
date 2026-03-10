@@ -16,6 +16,7 @@ export function useInstagramPosts(memberKey: MemberKey) {
   const failCountRef = useRef(0);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const fetchMoreAbortRef = useRef<AbortController | null>(null);
 
   const fetchPosts = useCallback(async (key: MemberKey) => {
     const member = MEMBERS.find((m) => m.key === key);
@@ -51,17 +52,23 @@ export function useInstagramPosts(memberKey: MemberKey) {
     const member = MEMBERS.find((m) => m.key === memberKey);
     if (!member) return;
 
+    fetchMoreAbortRef.current?.abort();
+    const controller = new AbortController();
+    fetchMoreAbortRef.current = controller;
+
     loadingMoreRef.current = true;
     setLoadingMore(true);
     try {
       const data = await apiFetch<PostsResponse>(
         `/api/posts/${member.username}?max_id=${nextMaxIdRef.current}`,
+        { signal: controller.signal },
       );
       failCountRef.current = 0;
       const newPosts = Array.isArray(data.posts) ? data.posts : [];
       setPosts((prev) => [...prev, ...newPosts]);
       nextMaxIdRef.current = data.nextMaxId;
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       failCountRef.current += 1;
       console.error("[load-more]", err instanceof Error ? err.message : err);
     } finally {
@@ -72,7 +79,10 @@ export function useInstagramPosts(memberKey: MemberKey) {
 
   useEffect(() => {
     fetchPosts(memberKey);
-    return () => abortRef.current?.abort();
+    return () => {
+      abortRef.current?.abort();
+      fetchMoreAbortRef.current?.abort();
+    };
   }, [memberKey, fetchPosts]);
 
   // Infinite scroll observer

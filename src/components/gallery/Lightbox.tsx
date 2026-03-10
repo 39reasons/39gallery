@@ -222,6 +222,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
             src={media[currentIndex]?.videoUrl}
             controls
             autoPlay
+            muted
             playsInline
             title="Post video"
             className="max-h-[70vh] md:max-h-[85vh] w-full object-contain"
