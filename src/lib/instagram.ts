@@ -3,6 +3,7 @@ import { IgFeedItem, IgFeedResponse, IgImageCandidate, IgCarouselMedia, IgWebPro
 import { IG_APP_ID, MOBILE_UA } from "@/lib/ig-session";
 
 function proxyUrl(igUrl: string): string {
+  if (!igUrl) return "";
   return `/api/image?url=${encodeURIComponent(igUrl)}`;
 }
 
