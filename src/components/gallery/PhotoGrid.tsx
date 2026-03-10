@@ -26,7 +26,7 @@ export const PhotoGrid = memo(function PhotoGrid({ posts, onSelect }: PhotoGridP
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1">
-      {posts.map((post) => (
+      {posts.filter((post) => post.imageUrl).map((post) => (
         <button
           key={post.id}
           onClick={() => onSelect(post)}

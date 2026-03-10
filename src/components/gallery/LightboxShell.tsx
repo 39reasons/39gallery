@@ -20,7 +20,7 @@ export function LightboxShell({ onClose, onPrevPost, onNextPost, children, sideb
     dialogRef.current?.focus();
 
     return () => {
-      if (previousFocusRef.current instanceof HTMLElement) {
+      if (previousFocusRef.current instanceof HTMLElement && previousFocusRef.current.isConnected) {
         previousFocusRef.current.focus();
       }
     };

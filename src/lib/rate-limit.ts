@@ -1,6 +1,7 @@
 const store = new Map<string, number[]>();
 
 const CLEANUP_INTERVAL = 60_000;
+const MAX_STORE_SIZE = 10_000;
 let lastCleanup = Date.now();
 
 function cleanup(windowMs: number) {
@@ -14,6 +15,16 @@ function cleanup(windowMs: number) {
       store.delete(key);
     } else {
       store.set(key, filtered);
+    }
+  }
+  // Evict oldest entries if store exceeds max size
+  if (store.size > MAX_STORE_SIZE) {
+    const excess = store.size - MAX_STORE_SIZE;
+    const keys = store.keys();
+    for (let i = 0; i < excess; i++) {
+      const next = keys.next();
+      if (next.done) break;
+      store.delete(next.value);
     }
   }
 }

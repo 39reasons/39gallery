@@ -58,8 +58,8 @@ export async function GET(request: NextRequest) {
     return new NextResponse(null, { status: response.status });
   }
 
-  const contentType = response.headers.get("content-type") ?? "image/jpeg";
-  if (!contentType.startsWith("image/") && !contentType.startsWith("video/")) {
+  const contentType = response.headers.get("content-type");
+  if (!contentType || (!contentType.startsWith("image/") && !contentType.startsWith("video/"))) {
     return NextResponse.json({ error: "Invalid content type" }, { status: 400 });
   }
 

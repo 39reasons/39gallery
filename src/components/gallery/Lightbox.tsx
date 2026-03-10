@@ -230,7 +230,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
         ) : (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={media[currentIndex]?.url || post.imageUrl}
+            src={media[currentIndex]?.url || post.imageUrl || undefined}
             alt={post.caption?.slice(0, 100) || "Post image"}
             className="max-h-[70vh] md:max-h-[85vh] w-full object-contain select-none"
             referrerPolicy="no-referrer"
