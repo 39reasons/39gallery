@@ -15,7 +15,7 @@ export function Header() {
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="p-2 rounded-md hover:bg-accent transition-colors"
-          aria-label="Toggle theme"
+          aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
         >
           <Sun className="h-4 w-4 hidden dark:block" />
           <Moon className="h-4 w-4 block dark:hidden" />
