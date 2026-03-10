@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { timeAgo } from "@/lib/time";
 import { Avatar } from "./Avatar";
@@ -75,8 +75,13 @@ export const CommentItem = memo(function CommentItem({ comment, mediaId }: { com
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const { displayText, ...translateProps } = useTranslateButton(comment.text, comment.lang);
+  const abortRef = useRef<AbortController | null>(null);
 
   const [replyError, setReplyError] = useState(false);
+
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
+  }, []);
 
   const loadReplies = async () => {
     if (loading) return;
@@ -84,25 +89,30 @@ export const CommentItem = memo(function CommentItem({ comment, mediaId }: { com
       setExpanded(false);
       return;
     }
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setLoading(true);
     setReplyError(false);
     try {
       const url = `/api/comments?mediaId=${encodeURIComponent(mediaId)}&parentId=${encodeURIComponent(comment.id)}`;
       const res = await fetch(url, {
-        signal: AbortSignal.timeout(10000),
+        signal: controller.signal,
       });
       if (!res.ok) throw new Error(`Failed to load replies (${res.status})`);
       const data = (await res.json()) as CommentsResponse;
       const rawReplies: Comment[] = data.comments ?? [];
       const texts = rawReplies.map((r) => r.text);
       const langs = await detectLanguages(texts);
+      if (controller.signal.aborted) return;
       setReplies(rawReplies.map((r, i) => ({ ...r, lang: langs[i] })));
       setExpanded(true);
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setReplies([]);
       setReplyError(true);
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   };
 
