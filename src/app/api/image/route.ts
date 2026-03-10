@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
   const isVideo = contentType.startsWith("video/");
   const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
   const parsedSize = contentLength ? parseInt(contentLength, 10) : NaN;
-  if (contentLength && (isNaN(parsedSize) || parsedSize > maxSize)) {
+  if (contentLength && (isNaN(parsedSize) || parsedSize < 0 || parsedSize > maxSize)) {
     response.body?.cancel();
     return NextResponse.json({ error: "Response too large" }, { status: 413 });
   }
