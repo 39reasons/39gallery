@@ -99,7 +99,8 @@ export function extractImageUrls(html: string): string[] {
   const imgRegex = /<img\s+src="([^"]+)"/g;
   let match;
   while ((match = imgRegex.exec(html)) !== null) {
-    urls.push(match[1] ?? "");
+    const raw = match[1] ?? "";
+    urls.push(raw.replace(/&amp;/g, "&").replace(/&quot;/g, '"'));
   }
   return urls;
 }
