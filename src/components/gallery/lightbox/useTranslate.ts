@@ -10,8 +10,9 @@ export async function detectLanguages(texts: string[]): Promise<string[]> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ texts }),
     });
+    if (!res.ok) return texts.map(() => "unknown");
     const data = (await res.json()) as DetectResponse;
-    return data.languages;
+    return data.languages ?? texts.map(() => "unknown");
   } catch {
     return texts.map(() => "unknown");
   }

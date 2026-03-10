@@ -8,7 +8,7 @@ const ALLOWED_TARGETS = new Set([
 const MAX_TEXT_LENGTH = 5000;
 
 export async function GET(request: NextRequest) {
-  const { success } = rateLimit(request, { limit: 30, windowMs: 60_000 });
+  const { success } = rateLimit(request, { limit: 60, windowMs: 60_000 });
   if (!success) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }

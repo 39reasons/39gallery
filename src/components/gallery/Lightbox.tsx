@@ -44,9 +44,12 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
     apiFetch<CommentsResponse>(`/api/comments?mediaId=${post.id}`)
       .then(async (data) => {
         const rawComments: Comment[] = data.comments ?? [];
+        setComments(rawComments);
         const texts = rawComments.map((c) => c.text);
-        const langs = texts.length > 0 ? await detectLanguages(texts) : [];
-        setComments(rawComments.map((c, i) => ({ ...c, lang: langs[i] })));
+        if (texts.length > 0) {
+          const langs = await detectLanguages(texts);
+          setComments(rawComments.map((c, i) => ({ ...c, lang: langs[i] })));
+        }
       })
       .catch(() => {
         setComments([]);
@@ -203,7 +206,6 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
             src={post.videoUrl}
             controls
             autoPlay
-            muted
             playsInline
             className="max-h-[70vh] md:max-h-[85vh] w-full object-contain"
           />

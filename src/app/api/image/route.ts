@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 
-const MAX_RESPONSE_SIZE = 15 * 1024 * 1024; // 15 MB
+const MAX_IMAGE_SIZE = 15 * 1024 * 1024; // 15 MB
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
 
 export async function GET(request: NextRequest) {
   const { success } = rateLimit(request, { limit: 120, windowMs: 60_000 });
@@ -32,13 +33,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
 
+  const upstreamHeaders: Record<string, string> = {
+    "User-Agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+  };
+
+  const rangeHeader = request.headers.get("range");
+  if (rangeHeader) {
+    upstreamHeaders["Range"] = rangeHeader;
+  }
+
   let response: Response;
   try {
     response = await fetch(url, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-      },
+      headers: upstreamHeaders,
       signal: AbortSignal.timeout(15000),
     });
   } catch (error) {
@@ -46,7 +54,7 @@ export async function GET(request: NextRequest) {
     return new NextResponse(null, { status: 502 });
   }
 
-  if (!response.ok) {
+  if (!response.ok && response.status !== 206) {
     return new NextResponse(null, { status: response.status });
   }
 
@@ -56,14 +64,29 @@ export async function GET(request: NextRequest) {
   }
 
   const contentLength = response.headers.get("content-length");
-  if (contentLength && parseInt(contentLength, 10) > MAX_RESPONSE_SIZE) {
+  const isVideo = contentType.startsWith("video/");
+  const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+  if (contentLength && parseInt(contentLength, 10) > maxSize) {
     return NextResponse.json({ error: "Response too large" }, { status: 413 });
   }
 
+  const responseHeaders: Record<string, string> = {
+    "Content-Type": contentType,
+    "Cache-Control": "public, max-age=86400",
+  };
+
+  if (contentLength) {
+    responseHeaders["Content-Length"] = contentLength;
+  }
+
+  const contentRange = response.headers.get("content-range");
+  if (contentRange) {
+    responseHeaders["Content-Range"] = contentRange;
+    responseHeaders["Accept-Ranges"] = "bytes";
+  }
+
   return new NextResponse(response.body, {
-    headers: {
-      "Content-Type": contentType,
-      "Cache-Control": "public, max-age=86400",
-    },
+    status: response.status,
+    headers: responseHeaders,
   });
 }
