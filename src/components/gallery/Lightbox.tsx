@@ -20,7 +20,7 @@ interface LightboxProps {
 }
 
 export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }: LightboxProps) {
-  const media = post.carouselMedia ?? [{ url: post.imageUrl, isVideo: post.isVideo, videoUrl: post.videoUrl }];
+  const media = post.carouselMedia?.length ? post.carouselMedia : [{ url: post.imageUrl, isVideo: post.isVideo, videoUrl: post.videoUrl }];
   const { currentIndex, prev, next, goTo } = useCarousel(media.length);
   const [liked, setLiked] = useState(post.hasLiked ?? false);
   const [liking, setLiking] = useState(false);

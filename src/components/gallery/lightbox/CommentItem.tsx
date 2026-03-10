@@ -51,7 +51,7 @@ function ReplyItem({ reply }: { reply: Comment }) {
       )}
       <div className="min-w-0">
         <div>
-          <span className="font-semibold">{reply.username}</span>{" "}
+          <span className="font-semibold break-all">{reply.username}</span>{" "}
           <span className="text-muted-foreground">{displayText}</span>
         </div>
         <div className="flex items-center gap-3 mt-0.5">
@@ -113,7 +113,7 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
         )}
         <div className="min-w-0">
           <div>
-            <span className="font-semibold">{comment.username}</span>{" "}
+            <span className="font-semibold break-all">{comment.username}</span>{" "}
             <span className="text-muted-foreground">{displayText}</span>
           </div>
           <div className="flex items-center gap-3 mt-0.5">
