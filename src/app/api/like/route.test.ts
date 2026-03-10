@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { NextRequest } from "next/server";
 
 vi.mock("@/lib/rate-limit", () => ({
   rateLimit: () => ({ success: true, remaining: 100 }),
@@ -17,8 +18,8 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-function makeRequest(body: unknown): Request {
-  return new Request("http://localhost/api/like", {
+function makeRequest(body: unknown): NextRequest {
+  return new NextRequest("http://localhost/api/like", {
     method: "POST",
     body: JSON.stringify(body),
     headers: { "Content-Type": "application/json" },
@@ -33,7 +34,7 @@ afterEach(() => {
 
 describe("POST /api/like", () => {
   it("returns 400 for invalid JSON body", async () => {
-    const req = new Request("http://localhost/api/like", {
+    const req = new NextRequest("http://localhost/api/like", {
       method: "POST",
       body: "not json",
       headers: { "Content-Type": "application/json" },
