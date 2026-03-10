@@ -108,6 +108,11 @@ describe("detectMember", () => {
   it("returns null for empty string", () => {
     expect(detectMember("")).toBeNull();
   });
+
+  it("does not match partial substrings", () => {
+    expect(detectMember("skkura posted")).toBeNull();
+    expect(detectMember("kkurasuke posted")).toBeNull();
+  });
 });
 
 describe("tweetUrlFromLink", () => {

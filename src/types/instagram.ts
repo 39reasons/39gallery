@@ -51,9 +51,9 @@ export interface WeversePost {
 }
 
 export const WEVERSE_MEMBER_PATTERNS: Record<Exclude<MemberKey, "le_sserafim">, RegExp> = {
-  chaewon: /chaewon|채원|kimchaewon/i,
-  sakura: /sakura|사쿠라|kkura/i,
-  yunjin: /yunjin|윤진|huhyunjin/i,
-  kazuha: /kazuha|카즈하/i,
-  eunchae: /eunchae|은채|hongeunchae/i,
+  chaewon: /\bchaewon\b|채원|\bkimchaewon\b/i,
+  sakura: /\bsakura\b|사쿠라|\bkkura\b/i,
+  yunjin: /\byunjin\b|윤진|\bhuhyunjin\b/i,
+  kazuha: /\bkazuha\b|카즈하/i,
+  eunchae: /\beunchae\b|은채|\bhongeunchae\b/i,
 };
