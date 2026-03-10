@@ -41,26 +41,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
     return () => { stale = true; };
   }, [post.id, post.caption]);
 
-  const fetchComments = useCallback(() => {
-    setComments([]);
-    setCommentsLoading(true);
-    setCommentsError(false);
-    apiFetch<CommentsResponse>(`/api/comments?mediaId=${post.id}`)
-      .then(async (data) => {
-        const rawComments: Comment[] = data.comments ?? [];
-        setComments(rawComments);
-        const texts = rawComments.map((c) => c.text);
-        if (texts.length > 0) {
-          const langs = await detectLanguages(texts);
-          setComments(rawComments.map((c, i) => ({ ...c, lang: langs[i] })));
-        }
-      })
-      .catch(() => {
-        setComments([]);
-        setCommentsError(true);
-      })
-      .finally(() => setCommentsLoading(false));
-  }, [post.id]);
+  const [commentRetry, setCommentRetry] = useState(0);
 
   useEffect(() => {
     let stale = false;
@@ -86,7 +67,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
       })
       .finally(() => { if (!stale) setCommentsLoading(false); });
     return () => { stale = true; };
-  }, [post.id]);
+  }, [post.id, commentRetry]);
 
   const handleLike = useCallback(async () => {
     if (liking) return;
@@ -210,7 +191,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
               <div className="text-center py-2">
                 <p className="text-xs text-destructive">Failed to load comments</p>
                 <button
-                  onClick={fetchComments}
+                  onClick={() => setCommentRetry((n) => n + 1)}
                   className="text-xs text-muted-foreground hover:text-foreground underline mt-1"
                 >
                   Retry
