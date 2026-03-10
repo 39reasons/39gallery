@@ -69,7 +69,7 @@ export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightbox
       <div className="relative flex-1 min-h-0 bg-black flex items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={post.imageUrls[currentIndex] ?? post.imageUrls[0] ?? ""}
+          src={post.imageUrls[currentIndex] || post.imageUrls[0] || undefined}
           alt={`Weverse DM from ${post.memberName}`}
           className="max-h-[70vh] md:max-h-[85vh] w-full object-contain select-none"
           referrerPolicy="no-referrer"
