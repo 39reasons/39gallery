@@ -13,7 +13,7 @@ function hasNonLatinScript(text: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
-  const { success } = rateLimit(request, { limit: 30, windowMs: 60_000 });
+  const { success } = rateLimit(request, { limit: 120, windowMs: 60_000 });
   if (!success) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
