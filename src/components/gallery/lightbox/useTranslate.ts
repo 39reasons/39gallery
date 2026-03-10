@@ -9,6 +9,7 @@ export async function detectLanguages(texts: string[]): Promise<string[]> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ texts }),
+      signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) return texts.map(() => "unknown");
     const data = (await res.json()) as DetectResponse;
@@ -43,7 +44,9 @@ export function useTranslateButton(text: string, lang?: string) {
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/translate?text=${encodeURIComponent(text)}`);
+      const res = await fetch(`/api/translate?text=${encodeURIComponent(text)}`, {
+        signal: AbortSignal.timeout(10000),
+      });
       if (!res.ok) throw new Error("Translation request failed");
       const data = (await res.json()) as TranslateResponse;
       setTranslated(data.translated ?? "Translation failed");

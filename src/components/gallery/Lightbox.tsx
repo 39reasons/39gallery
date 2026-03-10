@@ -34,7 +34,11 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
   useEffect(() => {
     setCaptionLang(undefined);
     if (!post.caption) return;
-    detectLanguages([post.caption]).then((langs) => setCaptionLang(langs[0]));
+    let stale = false;
+    detectLanguages([post.caption]).then((langs) => {
+      if (!stale) setCaptionLang(langs[0]);
+    });
+    return () => { stale = true; };
   }, [post.id, post.caption]);
 
   const fetchComments = useCallback(() => {
@@ -59,8 +63,30 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
   }, [post.id]);
 
   useEffect(() => {
-    fetchComments();
-  }, [fetchComments]);
+    let stale = false;
+    setComments([]);
+    setCommentsLoading(true);
+    setCommentsError(false);
+    apiFetch<CommentsResponse>(`/api/comments?mediaId=${post.id}`)
+      .then(async (data) => {
+        if (stale) return;
+        const rawComments: Comment[] = data.comments ?? [];
+        setComments(rawComments);
+        const texts = rawComments.map((c) => c.text);
+        if (texts.length > 0) {
+          const langs = await detectLanguages(texts);
+          if (!stale) setComments(rawComments.map((c, i) => ({ ...c, lang: langs[i] })));
+        }
+      })
+      .catch(() => {
+        if (!stale) {
+          setComments([]);
+          setCommentsError(true);
+        }
+      })
+      .finally(() => { if (!stale) setCommentsLoading(false); });
+    return () => { stale = true; };
+  }, [post.id]);
 
   const handleLike = useCallback(async () => {
     if (liking) return;
@@ -72,6 +98,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mediaId: post.id, unlike: !newLiked }),
+        signal: AbortSignal.timeout(10000),
       });
       if (!res.ok) {
         setLiked(!newLiked);
@@ -87,6 +114,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
 
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const lastTapRef = useRef(0);
+  const heartTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const handleDoubleTap = useCallback(() => {
     const now = Date.now();
@@ -95,12 +123,17 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
         handleLike();
       }
       setShowHeartAnim(true);
-      setTimeout(() => setShowHeartAnim(false), 800);
+      clearTimeout(heartTimerRef.current);
+      heartTimerRef.current = setTimeout(() => setShowHeartAnim(false), 800);
       lastTapRef.current = 0;
     } else {
       lastTapRef.current = now;
     }
   }, [liked, liking, handleLike]);
+
+  useEffect(() => {
+    return () => clearTimeout(heartTimerRef.current);
+  }, []);
 
   const date = new Date(post.timestamp * 1000).toLocaleDateString("en-US", {
     year: "numeric",

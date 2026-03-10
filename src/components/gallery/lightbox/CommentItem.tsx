@@ -86,7 +86,9 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
     setLoading(true);
     setReplyError(false);
     try {
-      const res = await fetch(`/api/comments?mediaId=${mediaId}&parentId=${comment.id}`);
+      const res = await fetch(`/api/comments?mediaId=${mediaId}&parentId=${comment.id}`, {
+        signal: AbortSignal.timeout(10000),
+      });
       if (!res.ok) throw new Error(`Failed to load replies (${res.status})`);
       const data = (await res.json()) as CommentsResponse;
       const rawReplies: Comment[] = data.comments ?? [];
@@ -139,9 +141,15 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
         </div>
       </div>
       {replyError && (
-        <p className="ml-8 mt-1 text-xs text-destructive">
-          Failed to load replies
-        </p>
+        <div className="ml-8 mt-1 text-xs">
+          <span className="text-destructive">Failed to load replies</span>{" "}
+          <button
+            onClick={loadReplies}
+            className="text-muted-foreground hover:text-foreground underline"
+          >
+            Retry
+          </button>
+        </div>
       )}
       {expanded && replies.length > 0 && (
         <div className="ml-8 mt-1.5 space-y-2 border-l pl-3 border-muted">
