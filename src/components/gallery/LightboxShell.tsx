@@ -69,6 +69,7 @@ export function LightboxShell({ onClose, onPrevPost, onNextPost, children, sideb
       ref={dialogRef}
       role="dialog"
       aria-modal="true"
+      aria-label="Post details"
       tabIndex={-1}
       className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center outline-none"
       onClick={onClose}

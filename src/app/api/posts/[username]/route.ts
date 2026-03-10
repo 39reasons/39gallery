@@ -11,7 +11,7 @@ export async function GET(
 ) {
   const { success } = rateLimit(request, { limit: 30, windowMs: 60_000 });
   if (!success) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": "60" } });
   }
 
   const { username } = await params;

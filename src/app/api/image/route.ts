@@ -7,7 +7,7 @@ const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
 export async function GET(request: NextRequest) {
   const { success } = rateLimit(request, { limit: 120, windowMs: 60_000 });
   if (!success) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": "60" } });
   }
 
   const url = request.nextUrl.searchParams.get("url");
