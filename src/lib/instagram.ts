@@ -32,17 +32,17 @@ async function igFetch<T>(url: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-const USER_IDS: Record<string, string> = {
-  "le_sserafim": "49655035864",
-  "_chaechae_1": "47653240204",
-  "39saku_chan": "3720950457",
-  "jenaissante": "54361831717",
-  "zuhazana": "52769062851",
-  "hhh.e_c.v": "57275466802",
-};
+const userIdCache = new Map<string, string>([
+  ["le_sserafim", "49655035864"],
+  ["_chaechae_1", "47653240204"],
+  ["39saku_chan", "3720950457"],
+  ["jenaissante", "54361831717"],
+  ["zuhazana", "52769062851"],
+  ["hhh.e_c.v", "57275466802"],
+]);
 
 async function getUserId(username: string): Promise<string> {
-  const cached = USER_IDS[username];
+  const cached = userIdCache.get(username);
   if (cached) return cached;
 
   const url = `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
@@ -52,6 +52,7 @@ async function getUserId(username: string): Promise<string> {
   if (!userId) {
     throw new Error(`Could not resolve user ID for ${username}`);
   }
+  userIdCache.set(username, userId);
   return userId;
 }
 
