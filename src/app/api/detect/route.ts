@@ -60,5 +60,7 @@ export async function POST(request: NextRequest) {
     })
   );
 
-  return NextResponse.json({ languages });
+  return NextResponse.json({ languages }, {
+    headers: { "Cache-Control": "no-store" },
+  });
 }
