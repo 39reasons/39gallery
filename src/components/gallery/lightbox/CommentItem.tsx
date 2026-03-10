@@ -79,6 +79,7 @@ export const CommentItem = memo(function CommentItem({ comment, mediaId }: { com
   const [replyError, setReplyError] = useState(false);
 
   const loadReplies = async () => {
+    if (loading) return;
     if (expanded) {
       setExpanded(false);
       return;
