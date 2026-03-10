@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
         if (!res.ok) return "unknown";
         const data = (await res.json()) as GTranslateResponse;
         const detected = data?.[2];
+        if (typeof detected !== "string") return "unknown";
         if (detected === "en" && hasNonLatinScript(text)) {
           return "non-en";
         }

@@ -41,9 +41,9 @@ export async function GET(request: NextRequest) {
       throw new Error("Unexpected Google Translate response format");
     }
     const translated = data[0]
-      .map((segment) => segment[0])
+      .map((segment) => (typeof segment[0] === "string" ? segment[0] : ""))
       .join("");
-    const detectedLang = data[2];
+    const detectedLang = typeof data[2] === "string" ? data[2] : "unknown";
 
     return NextResponse.json({ translated, detectedLang });
   } catch (error) {
