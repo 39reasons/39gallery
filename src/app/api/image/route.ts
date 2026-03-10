@@ -55,11 +55,13 @@ export async function GET(request: NextRequest) {
   }
 
   if (!response.ok && response.status !== 206) {
+    response.body?.cancel();
     return new NextResponse(null, { status: response.status });
   }
 
   const contentType = response.headers.get("content-type");
   if (!contentType || (!contentType.startsWith("image/") && !contentType.startsWith("video/"))) {
+    response.body?.cancel();
     return NextResponse.json({ error: "Invalid content type" }, { status: 400 });
   }
 
@@ -67,11 +69,13 @@ export async function GET(request: NextRequest) {
   const isVideo = contentType.startsWith("video/");
   const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
   if (contentLength && parseInt(contentLength, 10) > maxSize) {
+    response.body?.cancel();
     return NextResponse.json({ error: "Response too large" }, { status: 413 });
   }
 
   // Reject responses without content-length to prevent unbounded streaming
   if (!contentLength && !rangeHeader) {
+    response.body?.cancel();
     return NextResponse.json({ error: "Missing content length" }, { status: 502 });
   }
 
