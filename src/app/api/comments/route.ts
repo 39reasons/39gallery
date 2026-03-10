@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     const comments = (raw ?? []).map(mapComment);
 
     return NextResponse.json({ comments }, {
-      headers: { "Cache-Control": "private, no-store" },
+      headers: { "Cache-Control": "no-store" },
     });
   } catch (error) {
     console.error("[comments]", error instanceof Error ? error.message : error);

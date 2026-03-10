@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   }
 
   if (!mediaId || typeof mediaId !== "string" || !NUMERIC_ID.test(mediaId)) {
-    return NextResponse.json({ error: "valid mediaId is required" }, { status: 400 });
+    return NextResponse.json({ error: "Valid mediaId is required" }, { status: 400 });
   }
 
   let headers: Record<string, string>;
