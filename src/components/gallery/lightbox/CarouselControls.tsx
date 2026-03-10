@@ -58,7 +58,7 @@ export function CarouselControls({
             role="tab"
             aria-selected={i === currentIndex}
             aria-label={`Image ${i + 1} of ${total}`}
-            className="p-2 -m-1.5 flex items-center justify-center"
+            className="p-2 -m-1.5 flex items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
           >
             <span className={`block w-1.5 h-1.5 rounded-full ${
               i === currentIndex ? "bg-white" : "bg-white/40"

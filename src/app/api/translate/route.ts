@@ -10,7 +10,7 @@ const MAX_TEXT_LENGTH = 5000;
 export async function GET(request: NextRequest) {
   const { success } = rateLimit(request, { limit: 60, windowMs: 60_000 });
   if (!success) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": "60" } });
   }
 
   const text = request.nextUrl.searchParams.get("text");
