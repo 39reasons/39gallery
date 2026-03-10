@@ -37,8 +37,9 @@ export async function POST(request: NextRequest) {
       try {
         const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`;
         const res = await fetch(url);
+        if (!res.ok) return "unknown";
         const data = (await res.json()) as GTranslateResponse;
-        const detected = data[2];
+        const detected = data?.[2];
         if (detected === "en" && hasNonLatinScript(text)) {
           return "non-en";
         }

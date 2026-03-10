@@ -66,7 +66,7 @@ export function Gallery() {
       {!loading && !error && viewMode === "instagram" && (
         <>
           <PhotoGrid posts={igPosts} onSelect={(post) => setLightboxIndex(igPosts.indexOf(post))} />
-          <div ref={sentinelRef} className="h-1" />
+          <div ref={sentinelRef} className="h-1" aria-hidden="true" />
           {loadingMore && (
             <div className="flex justify-center py-4" aria-live="polite">
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

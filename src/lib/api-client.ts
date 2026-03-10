@@ -13,12 +13,15 @@ export async function apiFetch<T>(
   options?: RequestInit,
 ): Promise<T> {
   const res = await fetch(url, options);
-  const data = await res.json();
   if (!res.ok) {
-    throw new ApiError(
-      res.status,
-      (data as { error?: string }).error ?? `Request failed (${res.status})`,
-    );
+    let message = `Request failed (${res.status})`;
+    try {
+      const data = await res.json();
+      message = (data as { error?: string }).error ?? message;
+    } catch {
+      // non-JSON error body
+    }
+    throw new ApiError(res.status, message);
   }
-  return data as T;
+  return res.json() as Promise<T>;
 }

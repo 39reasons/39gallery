@@ -87,6 +87,7 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
     setReplyError(false);
     try {
       const res = await fetch(`/api/comments?mediaId=${mediaId}&parentId=${comment.id}`);
+      if (!res.ok) throw new Error(`Failed to load replies (${res.status})`);
       const data = (await res.json()) as CommentsResponse;
       const rawReplies: Comment[] = data.comments ?? [];
       const texts = rawReplies.map((r) => r.text);

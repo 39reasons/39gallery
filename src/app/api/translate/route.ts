@@ -31,9 +31,15 @@ export async function GET(request: NextRequest) {
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`;
     const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Google Translate API error: ${res.status}`);
+    }
     const data = (await res.json()) as GTranslateResponse;
 
     // Response format: [[["translated text","original text",...],...],...]
+    if (!Array.isArray(data?.[0])) {
+      throw new Error("Unexpected Google Translate response format");
+    }
     const translated = data[0]
       .map((segment) => segment[0])
       .join("");
