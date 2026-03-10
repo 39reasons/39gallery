@@ -20,8 +20,8 @@ interface LightboxProps {
 }
 
 export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }: LightboxProps) {
-  const images = post.carouselImages ?? [post.imageUrl];
-  const { currentIndex, prev, next, goTo } = useCarousel(images.length);
+  const media = post.carouselMedia ?? [{ url: post.imageUrl, isVideo: post.isVideo, videoUrl: post.videoUrl }];
+  const { currentIndex, prev, next, goTo } = useCarousel(media.length);
   const [liked, setLiked] = useState(post.hasLiked ?? false);
   const [liking, setLiking] = useState(false);
 
@@ -201,9 +201,10 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
         className="relative flex-1 min-h-0 bg-black flex items-center justify-center"
         onClick={handleDoubleTap}
       >
-        {post.isVideo && post.videoUrl ? (
+        {media[currentIndex]?.isVideo && media[currentIndex]?.videoUrl ? (
           <video
-            src={post.videoUrl}
+            key={currentIndex}
+            src={media[currentIndex].videoUrl}
             controls
             autoPlay
             playsInline
@@ -212,7 +213,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
         ) : (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={images[currentIndex]}
+            src={media[currentIndex]?.url || post.imageUrl}
             alt={post.caption?.slice(0, 100) || "Post image"}
             className="max-h-[70vh] md:max-h-[85vh] w-full object-contain select-none"
             referrerPolicy="no-referrer"
@@ -224,7 +225,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
         )}
         <CarouselControls
           currentIndex={currentIndex}
-          total={images.length}
+          total={media.length}
           onPrev={prev}
           onNext={next}
           onGoTo={goTo}

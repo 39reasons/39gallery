@@ -1,4 +1,4 @@
-import { InstagramPost } from "@/types/instagram";
+import { InstagramPost, CarouselItem } from "@/types/instagram";
 import { IgFeedItem, IgFeedResponse, IgImageCandidate, IgCarouselMedia, IgWebProfileResponse } from "@/types/instagram-api";
 import { IG_APP_ID, MOBILE_UA } from "@/lib/ig-session";
 
@@ -82,8 +82,16 @@ export async function fetchPosts(username: string, maxId?: string): Promise<{ po
     const caption = item.caption?.text ?? "";
     const isVideo = item.media_type === 2;
 
-    const carouselImages = item.carousel_media?.map(
-      (cm: IgCarouselMedia) => proxyUrl(bestImageUrl(cm))
+    const carouselMedia: CarouselItem[] | undefined = item.carousel_media?.map(
+      (cm: IgCarouselMedia) => {
+        const cmIsVideo = cm.media_type === 2;
+        const cmVideoUrl = cmIsVideo ? cm.video_versions?.[0]?.url : undefined;
+        return {
+          url: proxyUrl(bestImageUrl(cm)),
+          isVideo: cmIsVideo,
+          videoUrl: cmVideoUrl ? proxyUrl(cmVideoUrl) : undefined,
+        };
+      }
     );
 
     const videoUrl = isVideo ? item.video_versions?.[0]?.url : undefined;
@@ -99,9 +107,9 @@ export async function fetchPosts(username: string, maxId?: string): Promise<{ po
       commentCount: item.comment_count ?? 0,
       isVideo,
       videoUrl: videoUrl ? proxyUrl(videoUrl) : undefined,
-      carouselImages:
-        carouselImages && carouselImages.length > 0
-          ? carouselImages
+      carouselMedia:
+        carouselMedia && carouselMedia.length > 0
+          ? carouselMedia
           : undefined,
       hasLiked: item.has_liked ?? false,
       ownerUsername: item.user?.username ?? "",

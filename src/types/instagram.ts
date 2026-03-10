@@ -1,3 +1,9 @@
+export interface CarouselItem {
+  url: string;
+  isVideo: boolean;
+  videoUrl?: string;
+}
+
 export interface InstagramPost {
   id: string;
   shortcode: string;
@@ -9,7 +15,7 @@ export interface InstagramPost {
   commentCount: number;
   isVideo: boolean;
   videoUrl?: string;
-  carouselImages?: string[];
+  carouselMedia?: CarouselItem[];
   hasLiked?: boolean;
   ownerUsername?: string;
   ownerProfilePicUrl?: string;
