@@ -17,14 +17,14 @@ export async function GET(request: NextRequest) {
 
   try {
     const parsed = new URL(url);
-    const allowedHosts = [
+    const allowedSuffixes = [
       ".cdninstagram.com",
       ".fbcdn.net",
-      "nitter.net",
-      "pbs.twimg.com",
+      ".nitter.net",
+      ".pbs.twimg.com",
     ];
-    const isAllowed = allowedHosts.some(
-      (host) => parsed.hostname === host || parsed.hostname.endsWith(host)
+    const isAllowed = allowedSuffixes.some(
+      (suffix) => parsed.hostname === suffix.slice(1) || parsed.hostname.endsWith(suffix)
     );
     if (!isAllowed) {
       return NextResponse.json({ error: "Invalid image host" }, { status: 400 });
