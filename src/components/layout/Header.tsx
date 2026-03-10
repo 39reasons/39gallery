@@ -10,7 +10,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto px-4 h-14 flex items-center justify-between">
         <h1 className="text-lg font-semibold tracking-tight">
-          LE SSERAFIM Gallery
+          Fimstagram
         </h1>
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}

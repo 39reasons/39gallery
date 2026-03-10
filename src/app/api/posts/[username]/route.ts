@@ -1,12 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { fetchPosts } from "@/lib/instagram";
 import { MEMBERS } from "@/types/instagram";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ username: string }> }
 ) {
   const { username } = await params;
+  const maxId = request.nextUrl.searchParams.get("max_id") ?? undefined;
 
   const validUsernames = MEMBERS.map((m) => m.username);
   if (!validUsernames.includes(username)) {
@@ -14,10 +15,11 @@ export async function GET(
   }
 
   try {
-    const posts = fetchPosts(username);
-    return NextResponse.json({ posts });
+    const { posts, nextMaxId } = fetchPosts(username, maxId);
+    return NextResponse.json({ posts, nextMaxId });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(`[posts/${username}]`, message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
