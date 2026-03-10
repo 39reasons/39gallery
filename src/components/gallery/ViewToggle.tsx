@@ -34,7 +34,7 @@ export function ViewToggle({ mode, onModeChange }: ViewToggleProps) {
   };
 
   return (
-    <div className="inline-flex rounded-lg bg-secondary p-1 gap-1" role="tablist" aria-label="View mode">
+    <div className="inline-flex rounded-lg bg-secondary p-1 gap-1" role="tablist" aria-label="View mode" aria-orientation="horizontal">
       {MODES.map((m, i) => {
         const Icon = m.icon;
         return (

@@ -32,6 +32,7 @@ export function DMGrid({ posts, onSelect }: DMGridProps) {
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             referrerPolicy="no-referrer"
             loading="lazy"
+            onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0"; }}
           />
           {post.imageUrls.length > 1 && (
             <div className="absolute top-2 right-2" aria-hidden="true">

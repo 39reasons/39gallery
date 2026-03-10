@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { ViewToggle } from "./ViewToggle";
 import { MemberTabs } from "./MemberTabs";
@@ -33,6 +33,18 @@ export function Gallery() {
     error: wvError,
     retry: wvRetry,
   } = useWeversePosts(selected);
+
+  useEffect(() => {
+    if (lightboxIndex !== null && lightboxIndex >= igPosts.length) {
+      setLightboxIndex(null);
+    }
+  }, [igPosts.length, lightboxIndex]);
+
+  useEffect(() => {
+    if (dmLightboxIndex !== null && dmLightboxIndex >= wvPosts.length) {
+      setDmLightboxIndex(null);
+    }
+  }, [wvPosts.length, dmLightboxIndex]);
 
   const loading = viewMode === "instagram" ? igLoading : wvLoading;
   const error = viewMode === "instagram" ? igError : wvError;
