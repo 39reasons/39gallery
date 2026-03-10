@@ -42,10 +42,13 @@ export async function POST(request: Request) {
       signal: AbortSignal.timeout(15000),
     });
 
-    const json = await res.json();
+    const json = (await res.json()) as Record<string, unknown>;
 
-    if (json.status !== "ok") {
-      console.error("[like]", json.message ?? json.error_title ?? "Like failed");
+    if (json?.status !== "ok") {
+      const msg = typeof json?.message === "string" ? json.message
+        : typeof json?.error_title === "string" ? json.error_title
+        : "Like failed";
+      console.error("[like]", msg);
       return NextResponse.json({ error: "Like action failed" }, { status: 400 });
     }
 

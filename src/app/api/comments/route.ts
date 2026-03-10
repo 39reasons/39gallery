@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { igWebFetch } from "@/lib/ig-web";
 import { IgComment, IgCommentsResponse } from "@/types/instagram-api";
+import { rateLimit } from "@/lib/rate-limit";
 
 const NUMERIC_ID = /^\d{1,30}$/;
 
@@ -17,6 +18,11 @@ function mapComment(c: IgComment) {
 }
 
 export async function GET(request: NextRequest) {
+  const { success } = rateLimit(request, { limit: 60, windowMs: 60_000 });
+  if (!success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const mediaId = request.nextUrl.searchParams.get("mediaId");
   const parentId = request.nextUrl.searchParams.get("parentId");
 

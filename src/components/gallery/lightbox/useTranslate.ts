@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect } from "react";
 import { DetectResponse, TranslateResponse } from "@/types/api-responses";
 
 export async function detectLanguages(texts: string[]): Promise<string[]> {
@@ -24,12 +24,10 @@ export function useTranslateButton(text: string, lang?: string) {
   const [showing, setShowing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const prevTextRef = useRef(text);
-  if (prevTextRef.current !== text) {
-    prevTextRef.current = text;
+  useEffect(() => {
     setTranslated(null);
     setShowing(false);
-  }
+  }, [text]);
 
   const canTranslate = !!lang && lang !== "en";
 
