@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { ViewToggle } from "./ViewToggle";
 import { MemberTabs } from "./MemberTabs";
@@ -48,9 +48,9 @@ export function Gallery() {
   }, []);
 
   const igPostsRef = useRef(igPosts);
-  igPostsRef.current = igPosts;
+  useEffect(() => { igPostsRef.current = igPosts; }, [igPosts]);
   const wvPostsRef = useRef(wvPosts);
-  wvPostsRef.current = wvPosts;
+  useEffect(() => { wvPostsRef.current = wvPosts; }, [wvPosts]);
 
   const handleSelectPost = useCallback((post: { id: string }) => {
     setLightboxIndex(igPostsRef.current.findIndex((p) => p.id === post.id));
