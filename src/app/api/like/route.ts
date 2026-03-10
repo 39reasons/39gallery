@@ -10,7 +10,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  const { mediaId, unlike } = await request.json();
+  let mediaId: unknown;
+  let unlike: unknown;
+  try {
+    const body = await request.json();
+    mediaId = body?.mediaId;
+    unlike = body?.unlike;
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
   if (!mediaId || typeof mediaId !== "string" || !NUMERIC_ID.test(mediaId)) {
     return NextResponse.json({ error: "valid mediaId is required" }, { status: 400 });
@@ -23,7 +31,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No session configured" }, { status: 500 });
   }
 
-  const action = unlike ? "unlike" : "like";
+  const action = unlike === true ? "unlike" : "like";
   const url = `https://www.instagram.com/api/v1/web/likes/${mediaId}/${action}/`;
 
   try {
@@ -31,6 +39,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers,
       body: "",
+      signal: AbortSignal.timeout(15000),
     });
 
     const json = await res.json();
