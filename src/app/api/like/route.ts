@@ -48,7 +48,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Like action failed" }, { status: 400 });
     }
 
-    const json = (await res.json()) as Record<string, unknown>;
+    let json: Record<string, unknown>;
+    try {
+      json = (await res.json()) as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ error: "Like action failed" }, { status: 500 });
+    }
 
     if (json?.status !== "ok") {
       const msg = typeof json?.message === "string" ? json.message

@@ -2,9 +2,7 @@ import { readFile, writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { XMLParser } from "fast-xml-parser";
 import { MemberKey, WeversePost, WEVERSE_MEMBER_PATTERNS, MEMBERS } from "@/types/instagram";
-
-const USER_AGENT =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+import { WEB_UA } from "@/lib/ig-session";
 
 const RSS_SOURCES = [
   "https://nitter.net/sserapics/rss",
@@ -48,9 +46,13 @@ async function fetchRss(): Promise<string | null> {
   for (const url of RSS_SOURCES) {
     try {
       const res = await fetch(url, {
-        headers: { "User-Agent": USER_AGENT },
+        headers: { "User-Agent": WEB_UA },
         signal: AbortSignal.timeout(15000),
       });
+      if (!res.ok) {
+        await res.text();
+        continue;
+      }
       const xml = await res.text();
       if (xml.includes("<item>")) return xml;
     } catch {
