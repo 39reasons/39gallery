@@ -103,6 +103,11 @@ function extractImageUrls(html: string): string[] {
 }
 
 function proxyUrl(url: string): string {
+  try {
+    new URL(url);
+  } catch {
+    return "";
+  }
   return `/api/image?url=${encodeURIComponent(url)}`;
 }
 
@@ -153,7 +158,7 @@ async function fetchAndMerge(): Promise<WeversePost[]> {
     const detected = detectMember(item.title);
     if (!detected) continue;
 
-    const imageUrls = extractImageUrls(item.description).map(proxyUrl);
+    const imageUrls = extractImageUrls(item.description).map(proxyUrl).filter(Boolean);
     if (imageUrls.length === 0) continue;
 
     cached.push({
