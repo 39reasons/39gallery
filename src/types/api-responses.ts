@@ -16,4 +16,3 @@ export interface WeverseResponse { posts: WeversePost[] }
 export interface CommentsResponse { comments: ApiComment[] }
 export interface DetectResponse { languages: string[] }
 export interface TranslateResponse { translated: string; detectedLang: string }
-export interface ErrorResponse { error: string }
