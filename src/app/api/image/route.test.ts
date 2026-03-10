@@ -150,6 +150,12 @@ describe("GET /api/image", () => {
     expect(res.status).toBe(413);
   });
 
+  it("returns 413 when content-length is malformed (NaN)", async () => {
+    globalThis.fetch = mockUpstream({ contentLength: "not-a-number" });
+    const res = await GET(makeRequest({ url: "https://nitter.net/img.jpg" }));
+    expect(res.status).toBe(413);
+  });
+
   it("returns 502 when content-length is missing (non-range request)", async () => {
     globalThis.fetch = mockUpstream({ contentLength: null });
     const res = await GET(makeRequest({ url: "https://nitter.net/img.jpg" }));

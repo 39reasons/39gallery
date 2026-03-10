@@ -103,7 +103,7 @@ describe("POST /api/like", () => {
     expect(fetchUrl).toContain("/likes/123456/like/");
   });
 
-  it("returns 400 when Instagram returns non-ok HTTP status", async () => {
+  it("returns 502 when Instagram returns non-ok HTTP status", async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
@@ -111,7 +111,7 @@ describe("POST /api/like", () => {
     });
 
     const res = await POST(makeRequest({ mediaId: "123456" }));
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(502);
     const data = await res.json();
     expect(data.error).toBe("Like action failed");
   });
