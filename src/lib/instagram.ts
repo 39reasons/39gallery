@@ -2,7 +2,7 @@ import { InstagramPost, CarouselItem } from "@/types/instagram";
 import { IgFeedItem, IgFeedResponse, IgImageCandidate, IgCarouselMedia, IgWebProfileResponse } from "@/types/instagram-api";
 import { IG_APP_ID, MOBILE_UA } from "@/lib/ig-session";
 
-function proxyUrl(igUrl: string): string {
+export function proxyUrl(igUrl: string): string {
   if (!igUrl) return "";
   return `/api/image?url=${encodeURIComponent(igUrl)}`;
 }
@@ -57,7 +57,7 @@ async function getUserId(username: string): Promise<string> {
   return userId;
 }
 
-function bestImageUrl(item: { image_versions2?: { candidates?: IgImageCandidate[] } }): string {
+export function bestImageUrl(item: { image_versions2?: { candidates?: IgImageCandidate[] } }): string {
   const candidates = item?.image_versions2?.candidates;
   if (!candidates?.length) return "";
   const best = candidates.reduce((a, b) =>

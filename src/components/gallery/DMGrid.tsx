@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { WeversePost } from "@/types/instagram";
 
 interface DMGridProps {
@@ -7,7 +8,7 @@ interface DMGridProps {
   onSelect: (post: WeversePost) => void;
 }
 
-export function DMGrid({ posts, onSelect }: DMGridProps) {
+export const DMGrid = memo(function DMGrid({ posts, onSelect }: DMGridProps) {
   if (posts.length === 0) {
     return (
       <div className="text-center py-20 text-muted-foreground">
@@ -54,4 +55,4 @@ export function DMGrid({ posts, onSelect }: DMGridProps) {
       ))}
     </div>
   );
-}
+});
