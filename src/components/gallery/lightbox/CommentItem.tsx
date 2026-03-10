@@ -1,0 +1,144 @@
+"use client";
+
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { timeAgo } from "@/lib/time";
+import { Avatar } from "./Avatar";
+import { useTranslateButton, detectLanguages } from "./useTranslate";
+
+interface Comment {
+  id: string;
+  username: string;
+  profilePicUrl: string;
+  text: string;
+  createdAt: number;
+  likeCount: number;
+  replyCount: number;
+  lang?: string;
+}
+
+function TranslateButton({ canTranslate, toggle, loading, showing }: {
+  canTranslate: boolean;
+  toggle: () => void;
+  loading: boolean;
+  showing: boolean;
+}) {
+  if (!canTranslate) return null;
+  return (
+    <button
+      onClick={toggle}
+      className="text-xs text-muted-foreground/70 hover:text-muted-foreground"
+    >
+      {loading ? (
+        <Loader2 className="h-3 w-3 animate-spin inline" />
+      ) : showing ? (
+        "Show original"
+      ) : (
+        "See translation"
+      )}
+    </button>
+  );
+}
+
+function ReplyItem({ reply }: { reply: Comment }) {
+  const { displayText, ...translateProps } = useTranslateButton(reply.text, reply.lang);
+
+  return (
+    <div className="flex gap-2">
+      {reply.profilePicUrl && (
+        <Avatar src={reply.profilePicUrl} username={reply.username} />
+      )}
+      <div className="min-w-0">
+        <div>
+          <span className="font-semibold">{reply.username}</span>{" "}
+          <span className="text-muted-foreground">{displayText}</span>
+        </div>
+        <div className="flex items-center gap-3 mt-0.5">
+          <span className="text-xs text-muted-foreground/60">{timeAgo(reply.createdAt)}</span>
+          {reply.likeCount > 0 && (
+            <span className="text-xs text-muted-foreground/60">
+              {reply.likeCount} {reply.likeCount === 1 ? "like" : "likes"}
+            </span>
+          )}
+          <TranslateButton {...translateProps} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export { type Comment };
+
+export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: string }) {
+  const [replies, setReplies] = useState<Comment[]>([]);
+  const [expanded, setExpanded] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { displayText, ...translateProps } = useTranslateButton(comment.text, comment.lang);
+
+  const loadReplies = async () => {
+    if (expanded) {
+      setExpanded(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/comments?mediaId=${mediaId}&parentId=${comment.id}`);
+      const data = await res.json();
+      const rawReplies: Comment[] = data.comments ?? [];
+      const texts = rawReplies.map((r) => r.text);
+      const langs = await detectLanguages(texts);
+      setReplies(rawReplies.map((r, i) => ({ ...r, lang: langs[i] })));
+      setExpanded(true);
+    } catch {
+      setReplies([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="text-sm">
+      <div className="flex gap-2">
+        {comment.profilePicUrl && (
+          <Avatar src={comment.profilePicUrl} username={comment.username} />
+        )}
+        <div className="min-w-0">
+          <div>
+            <span className="font-semibold">{comment.username}</span>{" "}
+            <span className="text-muted-foreground">{displayText}</span>
+          </div>
+          <div className="flex items-center gap-3 mt-0.5">
+            <span className="text-xs text-muted-foreground/60">{timeAgo(comment.createdAt)}</span>
+            {comment.likeCount > 0 && (
+              <span className="text-xs text-muted-foreground/60">
+                {comment.likeCount} {comment.likeCount === 1 ? "like" : "likes"}
+              </span>
+            )}
+            <TranslateButton {...translateProps} />
+            {comment.replyCount > 0 && (
+              <button
+                onClick={loadReplies}
+                className="text-xs text-muted-foreground/70 hover:text-muted-foreground"
+              >
+                {loading ? (
+                  <Loader2 className="h-3 w-3 animate-spin inline" />
+                ) : expanded ? (
+                  "Hide replies"
+                ) : (
+                  `View ${comment.replyCount} ${comment.replyCount === 1 ? "reply" : "replies"}`
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      {expanded && replies.length > 0 && (
+        <div className="ml-8 mt-1.5 space-y-2 border-l pl-3 border-muted">
+          {replies.map((r) => (
+            <ReplyItem key={r.id} reply={r} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

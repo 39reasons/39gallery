@@ -1,22 +1,27 @@
-import { execSync } from "child_process";
 import { InstagramPost } from "@/types/instagram";
-
-const IG_APP_ID = "936619743392459";
-const MOBILE_UA = "Instagram 275.0.0.27.98 Android";
+import { IgFeedItem, IgFeedResponse, IgImageCandidate, IgCarouselMedia, IgWebProfileResponse } from "@/types/instagram-api";
+import { IG_APP_ID, MOBILE_UA } from "@/lib/ig-session";
 
 function proxyUrl(igUrl: string): string {
   return `/api/image?url=${encodeURIComponent(igUrl)}`;
 }
 
-function igCurl(url: string): string {
+async function igFetch(url: string): Promise<unknown> {
   const sessionId = process.env.IG_SESSION_ID;
-  const cookieHeader = sessionId ? ` -H "Cookie: sessionid=${sessionId}"` : "";
+  const headers: Record<string, string> = {
+    "x-ig-app-id": IG_APP_ID,
+    "User-Agent": MOBILE_UA,
+  };
+  if (sessionId) {
+    headers["Cookie"] = `sessionid=${sessionId}`;
+  }
 
-  const stdout = execSync(
-    `curl -s "${url}" -H "x-ig-app-id: ${IG_APP_ID}" -H "User-Agent: ${MOBILE_UA}"${cookieHeader}`,
-    { timeout: 15000, maxBuffer: 50 * 1024 * 1024 }
-  );
-  return stdout.toString();
+  const res = await fetch(url, {
+    headers,
+    signal: AbortSignal.timeout(15000),
+  });
+
+  return res.json();
 }
 
 const USER_IDS: Record<string, string> = {
@@ -28,12 +33,12 @@ const USER_IDS: Record<string, string> = {
   "hhh.e_c.v": "57275466802",
 };
 
-function getUserId(username: string): string {
+async function getUserId(username: string): Promise<string> {
   const cached = USER_IDS[username];
   if (cached) return cached;
 
   const url = `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
-  const json = JSON.parse(igCurl(url));
+  const json = (await igFetch(url)) as IgWebProfileResponse;
 
   const userId = json?.data?.user?.id;
   if (!userId) {
@@ -42,24 +47,21 @@ function getUserId(username: string): string {
   return userId;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function bestImageUrl(item: any): string {
+function bestImageUrl(item: { image_versions2?: { candidates?: IgImageCandidate[] } }): string {
   const candidates = item?.image_versions2?.candidates;
   if (!candidates?.length) return "";
-  // Pick the largest image
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const best = candidates.reduce((a: any, b: any) =>
+  const best = candidates.reduce((a, b) =>
     a.width * a.height > b.width * b.height ? a : b
   );
   return best.url;
 }
 
-export function fetchPosts(username: string, maxId?: string): { posts: InstagramPost[]; nextMaxId?: string } {
-  const userId = getUserId(username);
+export async function fetchPosts(username: string, maxId?: string): Promise<{ posts: InstagramPost[]; nextMaxId?: string }> {
+  const userId = await getUserId(username);
 
   let url = `https://i.instagram.com/api/v1/feed/user/${userId}/`;
   if (maxId) url += `?max_id=${maxId}`;
-  const json = JSON.parse(igCurl(url));
+  const json = (await igFetch(url)) as IgFeedResponse;
 
   if (!json?.items) {
     throw new Error(`Instagram returned no items for ${username}`);
@@ -67,14 +69,12 @@ export function fetchPosts(username: string, maxId?: string): { posts: Instagram
 
   const nextMaxId = json.next_max_id ? String(json.next_max_id) : undefined;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const posts = json.items.map((item: any) => {
+  const posts: InstagramPost[] = json.items.map((item: IgFeedItem) => {
     const caption = item.caption?.text ?? "";
     const isVideo = item.media_type === 2;
 
     const carouselImages = item.carousel_media?.map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (cm: any) => proxyUrl(bestImageUrl(cm))
+      (cm: IgCarouselMedia) => proxyUrl(bestImageUrl(cm))
     );
 
     const videoUrl = isVideo ? item.video_versions?.[0]?.url : undefined;

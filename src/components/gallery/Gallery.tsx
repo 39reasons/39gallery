@@ -102,7 +102,7 @@ export function Gallery() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0]?.isIntersecting) {
           fetchMorePosts();
         }
       },
@@ -159,6 +159,7 @@ export function Gallery() {
 
       {lightboxIndex !== null && posts[lightboxIndex] && (
         <Lightbox
+          key={posts[lightboxIndex].id}
           post={posts[lightboxIndex]}
           onClose={() => setLightboxIndex(null)}
           onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex((i) => i! - 1) : undefined}
@@ -177,6 +178,7 @@ export function Gallery() {
 
       {dmLightboxIndex !== null && weversePosts[dmLightboxIndex] && (
         <DMLightbox
+          key={weversePosts[dmLightboxIndex].id}
           post={weversePosts[dmLightboxIndex]}
           onClose={() => setDmLightboxIndex(null)}
           onPrevPost={() => setDmLightboxIndex((i) => (i! > 0 ? i! - 1 : weversePosts.length - 1))}
