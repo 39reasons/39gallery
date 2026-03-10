@@ -100,7 +100,7 @@ export function useInstagramPosts(memberKey: MemberKey) {
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [fetchMore]);
+  }, [fetchMore, loading]);
 
   const retry = useCallback(() => fetchPosts(memberKey), [memberKey, fetchPosts]);
 
