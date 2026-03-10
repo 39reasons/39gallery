@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchWeversePosts } from "@/lib/weverse";
-import { MEMBERS, MemberKey } from "@/types/instagram";
+import { isMemberKey } from "@/types/instagram";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET(
@@ -14,13 +14,12 @@ export async function GET(
 
   const { member } = await params;
 
-  const validKeys = MEMBERS.map((m) => m.key);
-  if (!validKeys.includes(member as MemberKey)) {
+  if (!isMemberKey(member)) {
     return NextResponse.json({ error: "Invalid member" }, { status: 400 });
   }
 
   try {
-    const posts = await fetchWeversePosts(member as MemberKey);
+    const posts = await fetchWeversePosts(member);
     return NextResponse.json({ posts }, {
       headers: { "Cache-Control": "private, max-age=300" },
     });
