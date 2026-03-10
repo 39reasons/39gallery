@@ -14,20 +14,28 @@ export function useInstagramPosts(memberKey: MemberKey) {
   const nextMaxIdRef = useRef<string | undefined>(undefined);
   const loadingMoreRef = useRef(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchPosts = useCallback(async (key: MemberKey) => {
     const member = MEMBERS.find((m) => m.key === key);
     if (!member) return;
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setLoading(true);
     setError(null);
     nextMaxIdRef.current = undefined;
 
     try {
-      const data = await apiFetch<PostsResponse>(`/api/posts/${member.username}`);
+      const data = await apiFetch<PostsResponse>(`/api/posts/${member.username}`, {
+        signal: controller.signal,
+      });
       setPosts(data.posts);
       nextMaxIdRef.current = data.nextMaxId;
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
       setError(err instanceof Error ? err.message : "Failed to fetch posts");
       setPosts([]);
     } finally {
@@ -58,6 +66,7 @@ export function useInstagramPosts(memberKey: MemberKey) {
 
   useEffect(() => {
     fetchPosts(memberKey);
+    return () => abortRef.current?.abort();
   }, [memberKey, fetchPosts]);
 
   // Infinite scroll observer
