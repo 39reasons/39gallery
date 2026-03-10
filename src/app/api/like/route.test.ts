@@ -79,8 +79,10 @@ describe("POST /api/like", () => {
     const data = await res.json();
     expect(data.status).toBe("ok");
 
-    const [fetchUrl] = mockFetch.mock.calls[0] as [string];
+    const [fetchUrl, fetchOpts] = mockFetch.mock.calls[0] as [string, RequestInit];
     expect(fetchUrl).toContain("/likes/123456/like/");
+    expect(fetchOpts.method).toBe("POST");
+    expect(fetchOpts.body).toBe("");
   });
 
   it("sends unlike request when unlike is true", async () => {

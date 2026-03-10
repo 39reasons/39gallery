@@ -70,7 +70,7 @@ export async function fetchPosts(username: string, maxId?: string): Promise<{ po
   const userId = await getUserId(username);
 
   let url = `https://i.instagram.com/api/v1/feed/user/${userId}/`;
-  if (maxId) url += `?max_id=${maxId}`;
+  if (maxId) url += `?max_id=${encodeURIComponent(maxId)}`;
   const json = await igFetch<IgFeedResponse>(url);
 
   if (!json?.items) {
