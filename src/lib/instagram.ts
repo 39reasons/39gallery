@@ -83,8 +83,8 @@ export async function fetchPosts(username: string, maxId?: string): Promise<{ po
     const caption = item.caption?.text ?? "";
     const isVideo = item.media_type === 2;
 
-    const carouselMedia: CarouselItem[] | undefined = item.carousel_media?.map(
-      (cm: IgCarouselMedia) => {
+    const carouselMedia: CarouselItem[] | undefined = item.carousel_media
+      ?.map((cm: IgCarouselMedia) => {
         const cmIsVideo = cm.media_type === 2;
         const cmVideoUrl = cmIsVideo ? cm.video_versions?.[0]?.url : undefined;
         return {
@@ -92,8 +92,8 @@ export async function fetchPosts(username: string, maxId?: string): Promise<{ po
           isVideo: cmIsVideo,
           videoUrl: cmVideoUrl ? proxyUrl(cmVideoUrl) : undefined,
         };
-      }
-    );
+      })
+      .filter((cm) => cm.url);
 
     const videoUrl = isVideo ? item.video_versions?.[0]?.url : undefined;
 
