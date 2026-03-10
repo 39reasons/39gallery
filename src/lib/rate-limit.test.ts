@@ -56,4 +56,13 @@ describe("rateLimit", () => {
     const { success } = rateLimit(req, { limit: 100, windowMs: 60_000 });
     expect(success).toBe(true);
   });
+
+  it("handles large number of unique IPs without crashing", () => {
+    const prefix = `eviction-${Date.now()}`;
+    const opts = { limit: 1, windowMs: 60_000 };
+    for (let i = 0; i < 100; i++) {
+      const { success } = rateLimit(mockRequest(`${prefix}-${i}`), opts);
+      expect(success).toBe(true);
+    }
+  });
 });
