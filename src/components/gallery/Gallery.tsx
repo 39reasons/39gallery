@@ -51,7 +51,7 @@ export function Gallery() {
   const retry = viewMode === "instagram" ? igRetry : wvRetry;
 
   return (
-    <main className="space-y-6">
+    <section className="space-y-6">
       <nav className="space-y-4" aria-label="Gallery filters">
         <ViewToggle mode={viewMode} onModeChange={setViewMode} />
         <MemberTabs selected={selected} onSelect={setSelected} />
@@ -118,6 +118,6 @@ export function Gallery() {
           onNextPost={dmLightboxIndex < wvPosts.length - 1 ? () => setDmLightboxIndex(dmLightboxIndex + 1) : undefined}
         />
       )}
-    </main>
+    </section>
   );
 }
