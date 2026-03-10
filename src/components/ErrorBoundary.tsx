@@ -4,6 +4,7 @@ import { Component, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
+  resetKey?: string | number;
 }
 
 interface State {
@@ -15,6 +16,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(): State {
     return { hasError: true };
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    if (this.state.hasError && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false });
+    }
   }
 
   componentDidCatch(error: Error) {

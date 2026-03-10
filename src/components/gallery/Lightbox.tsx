@@ -35,9 +35,9 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
     setCaptionLang(undefined);
     if (!post.caption) return;
     let stale = false;
-    detectLanguages([post.caption]).then((langs) => {
-      if (!stale) setCaptionLang(langs[0]);
-    });
+    detectLanguages([post.caption])
+      .then((langs) => { if (!stale) setCaptionLang(langs[0]); })
+      .catch(() => { /* detection failed, leave as unknown */ });
     return () => { stale = true; };
   }, [post.id, post.caption]);
 

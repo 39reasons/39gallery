@@ -16,8 +16,11 @@ export async function apiFetch<T>(
   if (!res.ok) {
     let message = `Request failed (${res.status})`;
     try {
-      const data = await res.json();
-      message = (data as { error?: string }).error ?? message;
+      const data: unknown = await res.json();
+      if (typeof data === "object" && data !== null && "error" in data) {
+        const err = (data as Record<string, unknown>).error;
+        if (typeof err === "string") message = err;
+      }
     } catch {
       // non-JSON error body
     }
