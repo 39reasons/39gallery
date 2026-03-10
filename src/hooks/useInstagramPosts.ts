@@ -13,6 +13,7 @@ export function useInstagramPosts(memberKey: MemberKey) {
   const [error, setError] = useState<string | null>(null);
   const nextMaxIdRef = useRef<string | undefined>(undefined);
   const loadingMoreRef = useRef(false);
+  const failCountRef = useRef(0);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -27,6 +28,7 @@ export function useInstagramPosts(memberKey: MemberKey) {
     setLoading(true);
     setError(null);
     nextMaxIdRef.current = undefined;
+    failCountRef.current = 0;
 
     try {
       const data = await apiFetch<PostsResponse>(`/api/posts/${member.username}`, {
@@ -45,6 +47,7 @@ export function useInstagramPosts(memberKey: MemberKey) {
 
   const fetchMore = useCallback(async () => {
     if (!nextMaxIdRef.current || loadingMoreRef.current) return;
+    if (failCountRef.current >= 3) return;
     const member = MEMBERS.find((m) => m.key === memberKey);
     if (!member) return;
 
@@ -54,10 +57,12 @@ export function useInstagramPosts(memberKey: MemberKey) {
       const data = await apiFetch<PostsResponse>(
         `/api/posts/${member.username}?max_id=${nextMaxIdRef.current}`,
       );
+      failCountRef.current = 0;
       const newPosts = Array.isArray(data.posts) ? data.posts : [];
       setPosts((prev) => [...prev, ...newPosts]);
       nextMaxIdRef.current = data.nextMaxId;
     } catch (err) {
+      failCountRef.current += 1;
       console.error("[load-more]", err instanceof Error ? err.message : err);
     } finally {
       loadingMoreRef.current = false;
