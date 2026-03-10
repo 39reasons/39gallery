@@ -7,7 +7,7 @@ import type { WeverseResponse } from "@/types/api-responses";
 
 export function useWeversePosts(memberKey: MemberKey) {
   const [posts, setPosts] = useState<WeversePost[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 

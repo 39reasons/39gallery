@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { memo, useRef } from "react";
 import { Instagram, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ViewMode } from "@/types/instagram";
@@ -15,7 +15,7 @@ const MODES: { key: ViewMode; label: string; icon: typeof Instagram }[] = [
   { key: "weverse", label: "Weverse DM", icon: MessageSquare },
 ];
 
-export function ViewToggle({ mode, onModeChange }: ViewToggleProps) {
+export const ViewToggle = memo(function ViewToggle({ mode, onModeChange }: ViewToggleProps) {
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
@@ -62,4 +62,4 @@ export function ViewToggle({ mode, onModeChange }: ViewToggleProps) {
       })}
     </div>
   );
-}
+});
