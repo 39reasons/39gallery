@@ -108,4 +108,25 @@ describe("apiFetch", () => {
       body: "data",
     }));
   });
+
+  it("preserves timeout when caller provides a signal", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({}),
+    });
+    globalThis.fetch = mockFetch;
+
+    const controller = new AbortController();
+    await apiFetch("/api/test", { signal: controller.signal });
+
+    const [, opts] = mockFetch.mock.calls[0] as [string, RequestInit];
+    // Signal should NOT be the caller's raw signal (it should be a combined signal)
+    expect(opts.signal).not.toBe(controller.signal);
+    expect(opts.signal).toBeDefined();
+    // The combined signal should not be aborted
+    expect(opts.signal!.aborted).toBe(false);
+    // Aborting the caller's controller should abort the combined signal
+    controller.abort();
+    expect(opts.signal!.aborted).toBe(true);
+  });
 });
