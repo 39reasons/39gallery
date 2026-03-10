@@ -219,7 +219,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
         {media[currentIndex]?.isVideo && media[currentIndex]?.videoUrl ? (
           <video
             key={currentIndex}
-            src={media[currentIndex].videoUrl}
+            src={media[currentIndex]?.videoUrl}
             controls
             autoPlay
             playsInline
