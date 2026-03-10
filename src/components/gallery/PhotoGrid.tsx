@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { Heart, MessageCircle, Play } from "lucide-react";
 import { InstagramPost } from "@/types/instagram";
+import { CarouselIcon } from "./CarouselIcon";
 
 interface PhotoGridProps {
   posts: InstagramPost[];
@@ -53,9 +54,7 @@ export const PhotoGrid = memo(function PhotoGrid({ posts, onSelect }: PhotoGridP
           )}
           {!post.isVideo && post.carouselMedia && (
             <div className="absolute top-2 right-2" aria-hidden="true">
-              <svg className="h-5 w-5 text-white drop-shadow-md" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z" />
-              </svg>
+              <CarouselIcon />
             </div>
           )}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">

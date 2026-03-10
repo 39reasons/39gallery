@@ -101,7 +101,6 @@ export async function fetchPosts(username: string, maxId?: string): Promise<{ po
       id: String(item.pk),
       shortcode: item.code,
       imageUrl: proxyUrl(bestImageUrl(item)),
-      thumbnailUrl: proxyUrl(bestImageUrl(item)),
       caption,
       timestamp: item.taken_at,
       likeCount: item.like_count ?? 0,

@@ -3,6 +3,7 @@ import { join } from "path";
 import { XMLParser } from "fast-xml-parser";
 import { MemberKey, WeversePost, WEVERSE_MEMBER_PATTERNS, MEMBERS } from "@/types/instagram";
 import { WEB_UA } from "@/lib/ig-session";
+import { proxyUrl } from "@/lib/instagram";
 
 const RSS_SOURCES = [
   "https://nitter.net/sserapics/rss",
@@ -105,13 +106,13 @@ export function extractImageUrls(html: string): string[] {
   return urls;
 }
 
-function proxyUrl(url: string): string {
+function safeProxyUrl(url: string): string {
   try {
     new URL(url);
   } catch {
     return "";
   }
-  return `/api/image?url=${encodeURIComponent(url)}`;
+  return proxyUrl(url);
 }
 
 export function stripHtml(html: string): string {
@@ -161,7 +162,7 @@ async function fetchAndMerge(): Promise<WeversePost[]> {
     const detected = detectMember(item.title);
     if (!detected) continue;
 
-    const imageUrls = extractImageUrls(item.description).map(proxyUrl).filter(Boolean);
+    const imageUrls = extractImageUrls(item.description).map(safeProxyUrl).filter(Boolean);
     if (imageUrls.length === 0) continue;
 
     cached.push({

@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import type { WeversePost } from "@/types/instagram";
+import { CarouselIcon } from "./CarouselIcon";
 
 interface DMGridProps {
   posts: WeversePost[];
@@ -41,9 +42,7 @@ export const DMGrid = memo(function DMGrid({ posts, onSelect }: DMGridProps) {
           />
           {post.imageUrls.length > 1 && (
             <div className="absolute top-2 right-2" aria-hidden="true">
-              <svg className="h-5 w-5 text-white drop-shadow-md" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z" />
-              </svg>
+              <CarouselIcon />
             </div>
           )}
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2 pt-6">

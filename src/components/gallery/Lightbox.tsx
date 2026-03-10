@@ -5,12 +5,11 @@ import { Heart, MessageCircle, Loader2 } from "lucide-react";
 import { InstagramPost } from "@/types/instagram";
 import { LightboxShell } from "./LightboxShell";
 import { CommentItem } from "./lightbox/CommentItem";
-import type { ApiComment as Comment } from "@/types/api-responses";
+import type { CommentsResponse, ApiComment as Comment } from "@/types/api-responses";
 import { useTranslateButton, detectLanguages } from "./lightbox/useTranslate";
 import { useCarousel } from "./lightbox/useCarousel";
 import { CarouselControls } from "./lightbox/CarouselControls";
 import { apiFetch } from "@/lib/api-client";
-import { CommentsResponse } from "@/types/api-responses";
 
 interface LightboxProps {
   post: InstagramPost;

@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-function proxyPic(url: string) {
-  return `/api/image?url=${encodeURIComponent(url)}`;
-}
+import { proxyUrl } from "@/lib/instagram";
 
 export function Avatar({ src, username }: { src: string; username: string }) {
   const [failed, setFailed] = useState(false);
@@ -20,7 +17,7 @@ export function Avatar({ src, username }: { src: string; username: string }) {
   return (
     /* eslint-disable-next-line @next/next/no-img-element */
     <img
-      src={proxyPic(src)}
+      src={proxyUrl(src)}
       alt={username}
       className="h-6 w-6 rounded-full object-cover shrink-0"
       referrerPolicy="no-referrer"
