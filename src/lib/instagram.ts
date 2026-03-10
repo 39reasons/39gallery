@@ -11,6 +11,9 @@ async function igFetch(url: string): Promise<unknown> {
   const headers: Record<string, string> = {
     "x-ig-app-id": IG_APP_ID,
     "User-Agent": MOBILE_UA,
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Dest": "empty",
   };
   if (sessionId) {
     headers["Cookie"] = `sessionid=${sessionId}`;
@@ -20,6 +23,11 @@ async function igFetch(url: string): Promise<unknown> {
     headers,
     signal: AbortSignal.timeout(15000),
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Instagram API error ${res.status}: ${text.slice(0, 100)}`);
+  }
 
   return res.json();
 }
