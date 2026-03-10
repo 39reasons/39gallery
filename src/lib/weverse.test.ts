@@ -31,6 +31,11 @@ describe("isWeverseDm", () => {
   it("rejects empty string", () => {
     expect(isWeverseDm("")).toBe(false);
   });
+
+  it("requires whitespace between weverse and keyword", () => {
+    expect(isWeverseDm("weversedm")).toBe(false);
+    expect(isWeverseDm("weverseupdate")).toBe(false);
+  });
 });
 
 describe("extractImageUrls", () => {
@@ -61,6 +66,11 @@ describe("extractImageUrls", () => {
     const html = '<img src="https://example.com/img.jpg?q=hello&amp;v=1" />';
     expect(extractImageUrls(html)).toEqual(["https://example.com/img.jpg?q=hello&v=1"]);
   });
+
+  it("extracts URL when src is not the first attribute", () => {
+    const html = '<img alt="test" class="photo" src="https://example.com/img.jpg" />';
+    expect(extractImageUrls(html)).toEqual(["https://example.com/img.jpg"]);
+  });
 });
 
 describe("stripHtml", () => {
@@ -82,6 +92,15 @@ describe("stripHtml", () => {
 
   it("trims whitespace", () => {
     expect(stripHtml("  hello  ")).toBe("hello");
+  });
+
+  it("handles uppercase BR tags", () => {
+    expect(stripHtml("line1<BR>line2")).toBe("line1\nline2");
+    expect(stripHtml("line1<BR />line2")).toBe("line1\nline2");
+  });
+
+  it("handles uppercase A tags", () => {
+    expect(stripHtml('<A href="https://x.com">link</A>')).toBe("link");
   });
 });
 

@@ -91,12 +91,12 @@ function parseRssItems(xml: string): RssItem[] {
 }
 
 export function isWeverseDm(text: string): boolean {
-  return /weverse\s*(dm|message|update)/i.test(text);
+  return /weverse\s+(dm|message|update)/i.test(text);
 }
 
 export function extractImageUrls(html: string): string[] {
   const urls: string[] = [];
-  const imgRegex = /<img\s+src="([^"]+)"/g;
+  const imgRegex = /<img\s[^>]*?src="([^"]+)"/gi;
   let match;
   while ((match = imgRegex.exec(html)) !== null) {
     const raw = match[1] ?? "";
@@ -116,8 +116,8 @@ function proxyUrl(url: string): string {
 
 export function stripHtml(html: string): string {
   return html
-    .replace(/<br\s*\/?>/g, "\n")
-    .replace(/<a[^>]*>([^<]*)<\/a>/g, "$1")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<a[^>]*>([^<]*)<\/a>/gi, "$1")
     .replace(/<[^>]+>/g, "")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
