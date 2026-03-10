@@ -15,7 +15,7 @@ const CACHE_FILE = join(CACHE_DIR, "posts.json");
 
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
-  processEntities: true,
+  processEntities: false,
 });
 
 // --- Cache ---
@@ -61,7 +61,13 @@ async function fetchRss(): Promise<string | null> {
 }
 
 function parseRssItems(xml: string): RssItem[] {
-  const parsed = xmlParser.parse(xml);
+  let parsed;
+  try {
+    parsed = xmlParser.parse(xml);
+  } catch (err) {
+    console.error("[weverse] Failed to parse RSS XML:", err instanceof Error ? err.message : err);
+    return [];
+  }
   const rawItems = parsed?.rss?.channel?.item;
   if (!rawItems) return [];
 
@@ -157,7 +163,7 @@ async function fetchAndMerge(): Promise<WeversePost[]> {
       memberName: detected.name,
       tweetUrl: tweetUrlFromLink(item.link),
       tweetText: stripHtml(item.title),
-      timestamp: Math.floor(new Date(item.pubDate).getTime() / 1000),
+      timestamp: Math.floor(new Date(item.pubDate).getTime() / 1000) || 0,
     });
     added = true;
   }

@@ -18,7 +18,7 @@ export function DMGrid({ posts, onSelect }: DMGridProps) {
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-      {posts.map((post) => (
+      {posts.filter((post) => post.imageUrls.length > 0).map((post) => (
         <button
           key={post.id}
           onClick={() => onSelect(post)}
