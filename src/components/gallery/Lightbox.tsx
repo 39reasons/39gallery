@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useCallback, useState, useRef } from "react";
-import { Heart, MessageCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Heart, MessageCircle, Loader2 } from "lucide-react";
 import { InstagramPost } from "@/types/instagram";
-import { CommentsResponse } from "@/types/api-responses";
 import { LightboxShell } from "./LightboxShell";
 import { CommentItem, type Comment } from "./lightbox/CommentItem";
 import { useTranslateButton, detectLanguages } from "./lightbox/useTranslate";
+import { useCarousel } from "./lightbox/useCarousel";
+import { CarouselControls } from "./lightbox/CarouselControls";
+import { apiFetch } from "@/lib/api-client";
+import { CommentsResponse } from "@/types/api-responses";
 
 interface LightboxProps {
   post: InstagramPost;
@@ -18,12 +21,13 @@ interface LightboxProps {
 
 export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }: LightboxProps) {
   const images = post.carouselImages ?? [post.imageUrl];
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { currentIndex, prev, next, goTo } = useCarousel(images.length);
   const [liked, setLiked] = useState(post.hasLiked ?? false);
   const [liking, setLiking] = useState(false);
 
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsError, setCommentsError] = useState(false);
   const [captionLang, setCaptionLang] = useState<string | undefined>(undefined);
   const captionTranslate = useTranslateButton(post.caption ?? "", captionLang);
 
@@ -33,20 +37,27 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
     detectLanguages([post.caption]).then((langs) => setCaptionLang(langs[0]));
   }, [post.id, post.caption]);
 
-  useEffect(() => {
+  const fetchComments = useCallback(() => {
     setComments([]);
     setCommentsLoading(true);
-    fetch(`/api/comments?mediaId=${post.id}`)
-      .then((res) => res.json() as Promise<CommentsResponse>)
+    setCommentsError(false);
+    apiFetch<CommentsResponse>(`/api/comments?mediaId=${post.id}`)
       .then(async (data) => {
         const rawComments: Comment[] = data.comments ?? [];
         const texts = rawComments.map((c) => c.text);
         const langs = texts.length > 0 ? await detectLanguages(texts) : [];
         setComments(rawComments.map((c, i) => ({ ...c, lang: langs[i] })));
       })
-      .catch(() => setComments([]))
+      .catch(() => {
+        setComments([]);
+        setCommentsError(true);
+      })
       .finally(() => setCommentsLoading(false));
   }, [post.id]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
 
   const handleLike = useCallback(async () => {
     if (liking) return;
@@ -88,24 +99,6 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
     }
   }, [liked, liking, handleLike]);
 
-  const handlePrevImage = useCallback(() => {
-    setCurrentIndex((i) => Math.max(0, i - 1));
-  }, []);
-
-  const handleNextImage = useCallback(() => {
-    setCurrentIndex((i) => Math.min(images.length - 1, i + 1));
-  }, [images.length]);
-
-  // Carousel keyboard shortcuts (Shift+Arrow)
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "ArrowLeft" && e.shiftKey) handlePrevImage();
-      if (e.key === "ArrowRight" && e.shiftKey) handleNextImage();
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [handlePrevImage, handleNextImage]);
-
   const date = new Date(post.timestamp * 1000).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -142,6 +135,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
                 alt={post.ownerUsername}
                 className="h-8 w-8 rounded-full object-cover"
                 referrerPolicy="no-referrer"
+                loading="lazy"
               />
               <span className="text-sm font-semibold">{post.ownerUsername}</span>
             </div>
@@ -175,6 +169,16 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
             {commentsLoading ? (
               <div className="flex justify-center py-2">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            ) : commentsError ? (
+              <div className="text-center py-2">
+                <p className="text-xs text-destructive">Failed to load comments</p>
+                <button
+                  onClick={fetchComments}
+                  className="text-xs text-muted-foreground hover:text-foreground underline mt-1"
+                >
+                  Retry
+                </button>
               </div>
             ) : comments.length > 0 ? (
               <div className="space-y-2.5">
@@ -216,34 +220,13 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
         {showHeartAnim && (
           <Heart className="absolute h-20 w-20 fill-white text-white animate-ping pointer-events-none" />
         )}
-        {images.length > 1 && (
-          <>
-            <button
-              onClick={handlePrevImage}
-              disabled={currentIndex === 0}
-              className={`absolute left-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 ${currentIndex === 0 ? "bg-black/30 text-white/30 cursor-default" : "bg-black/50 hover:bg-black/70 text-white"}`}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              onClick={handleNextImage}
-              disabled={currentIndex === images.length - 1}
-              className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 ${currentIndex === images.length - 1 ? "bg-black/30 text-white/30 cursor-default" : "bg-black/50 hover:bg-black/70 text-white"}`}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {images.map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    i === currentIndex ? "bg-white" : "bg-white/40"
-                  }`}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        <CarouselControls
+          currentIndex={currentIndex}
+          total={images.length}
+          onPrev={prev}
+          onNext={next}
+          onGoTo={goTo}
+        />
       </div>
     </LightboxShell>
   );

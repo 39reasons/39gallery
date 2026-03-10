@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GTranslateResponse } from "@/types/google-translate";
+import { rateLimit } from "@/lib/rate-limit";
 
 const ALLOWED_TARGETS = new Set([
   "en", "ko", "ja", "zh", "es", "fr", "de", "pt", "ru", "ar", "hi", "th", "vi", "id",
@@ -7,6 +8,11 @@ const ALLOWED_TARGETS = new Set([
 const MAX_TEXT_LENGTH = 5000;
 
 export async function GET(request: NextRequest) {
+  const { success } = rateLimit(request, { limit: 30, windowMs: 60_000 });
+  if (!success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const text = request.nextUrl.searchParams.get("text");
   const target = request.nextUrl.searchParams.get("target") ?? "en";
 
@@ -35,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ translated, detectedLang });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[translate]", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Translation failed" }, { status: 500 });
   }
 }

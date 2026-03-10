@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 const MAX_RESPONSE_SIZE = 15 * 1024 * 1024; // 15 MB
 
 export async function GET(request: NextRequest) {
+  const { success } = rateLimit(request, { limit: 120, windowMs: 60_000 });
+  if (!success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const url = request.nextUrl.searchParams.get("url");
   if (!url) {
     return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
@@ -26,13 +32,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
 
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    },
-    signal: AbortSignal.timeout(15000),
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch (error) {
+    console.error("[image-proxy] upstream fetch failed:", error instanceof Error ? error.message : error);
+    return new NextResponse(null, { status: 502 });
+  }
 
   if (!response.ok) {
     return new NextResponse(null, { status: response.status });

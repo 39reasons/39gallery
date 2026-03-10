@@ -76,12 +76,15 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
   const [loading, setLoading] = useState(false);
   const { displayText, ...translateProps } = useTranslateButton(comment.text, comment.lang);
 
+  const [replyError, setReplyError] = useState(false);
+
   const loadReplies = async () => {
     if (expanded) {
       setExpanded(false);
       return;
     }
     setLoading(true);
+    setReplyError(false);
     try {
       const res = await fetch(`/api/comments?mediaId=${mediaId}&parentId=${comment.id}`);
       const data = (await res.json()) as CommentsResponse;
@@ -92,6 +95,7 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
       setExpanded(true);
     } catch {
       setReplies([]);
+      setReplyError(true);
     } finally {
       setLoading(false);
     }
@@ -133,6 +137,11 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
           </div>
         </div>
       </div>
+      {replyError && (
+        <p className="ml-8 mt-1 text-xs text-destructive">
+          Failed to load replies
+        </p>
+      )}
       {expanded && replies.length > 0 && (
         <div className="ml-8 mt-1.5 space-y-2 border-l pl-3 border-muted">
           {replies.map((r) => (

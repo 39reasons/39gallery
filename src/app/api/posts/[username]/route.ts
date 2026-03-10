@@ -24,8 +24,7 @@ export async function GET(
     const { posts, nextMaxId } = await fetchPosts(username, maxId);
     return NextResponse.json({ posts, nextMaxId });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    console.error(`[posts/${username}]`, message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error(`[posts/${username}]`, error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 });
   }
 }

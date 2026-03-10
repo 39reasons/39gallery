@@ -17,7 +17,7 @@ export async function GET(
     const posts = await fetchWeversePosts(member as MemberKey);
     return NextResponse.json({ posts });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[weverse]", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Failed to fetch DM updates" }, { status: 500 });
   }
 }

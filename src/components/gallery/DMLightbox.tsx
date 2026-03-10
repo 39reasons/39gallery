@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
-import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import type { WeversePost } from "@/types/instagram";
 import { LightboxShell } from "./LightboxShell";
+import { useCarousel } from "./lightbox/useCarousel";
+import { CarouselControls } from "./lightbox/CarouselControls";
 
 interface DMLightboxProps {
   post: WeversePost;
@@ -13,25 +14,7 @@ interface DMLightboxProps {
 }
 
 export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightboxProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handlePrevImage = useCallback(() => {
-    setCurrentIndex((i) => (i > 0 ? i - 1 : post.imageUrls.length - 1));
-  }, [post.imageUrls.length]);
-
-  const handleNextImage = useCallback(() => {
-    setCurrentIndex((i) => (i < post.imageUrls.length - 1 ? i + 1 : 0));
-  }, [post.imageUrls.length]);
-
-  // Carousel keyboard shortcuts (Shift+Arrow)
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "ArrowLeft" && e.shiftKey) handlePrevImage();
-      if (e.key === "ArrowRight" && e.shiftKey) handleNextImage();
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [handlePrevImage, handleNextImage]);
+  const { currentIndex, prev, next, goTo } = useCarousel(post.imageUrls.length);
 
   const date = new Date(post.timestamp * 1000).toLocaleDateString("en-US", {
     year: "numeric",
@@ -79,32 +62,13 @@ export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightbox
           className="max-h-[70vh] md:max-h-[85vh] w-full object-contain"
           referrerPolicy="no-referrer"
         />
-        {post.imageUrls.length > 1 && (
-          <>
-            <button
-              onClick={handlePrevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <button
-              onClick={handleNextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {post.imageUrls.map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    i === currentIndex ? "bg-white" : "bg-white/40"
-                  }`}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        <CarouselControls
+          currentIndex={currentIndex}
+          total={post.imageUrls.length}
+          onPrev={prev}
+          onNext={next}
+          onGoTo={goTo}
+        />
       </div>
     </LightboxShell>
   );
