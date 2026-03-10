@@ -2,9 +2,10 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 vi.mock("@/lib/rate-limit", () => ({
-  rateLimit: () => ({ success: true, remaining: 100 }),
+  rateLimit: vi.fn(() => ({ success: true, remaining: 100 })),
 }));
 
+const { rateLimit } = await import("@/lib/rate-limit");
 const { POST } = await import("./route");
 
 function makeRequest(body: unknown): NextRequest {
@@ -141,5 +142,12 @@ describe("POST /api/translate", () => {
     });
     const res = await POST(makeRequest({ text: "hello" }));
     expect(res.headers.get("Cache-Control")).toBe("private, max-age=3600");
+  });
+
+  it("returns 429 when rate limited", async () => {
+    vi.mocked(rateLimit).mockReturnValueOnce({ success: false, remaining: 0 });
+    const res = await POST(makeRequest({ text: "hello" }));
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Retry-After")).toBe("60");
   });
 });

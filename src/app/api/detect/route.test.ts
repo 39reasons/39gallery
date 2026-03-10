@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
-// Mock rate limiter to always allow
 vi.mock("@/lib/rate-limit", () => ({
-  rateLimit: () => ({ success: true, remaining: 100 }),
+  rateLimit: vi.fn(() => ({ success: true, remaining: 100 })),
 }));
 
+const { rateLimit } = await import("@/lib/rate-limit");
 const { POST } = await import("./route");
 
 function makeRequest(body: unknown): NextRequest {
@@ -136,5 +136,12 @@ describe("POST /api/detect", () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.languages).toEqual(["fr", "unknown", "unknown"]);
+  });
+
+  it("returns 429 when rate limited", async () => {
+    vi.mocked(rateLimit).mockReturnValueOnce({ success: false, remaining: 0 });
+    const res = await POST(makeRequest({ texts: ["hello"] }));
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Retry-After")).toBe("60");
   });
 });
