@@ -8,7 +8,7 @@ import type { PostsResponse } from "@/types/api-responses";
 
 export function useInstagramPosts(memberKey: MemberKey) {
   const [posts, setPosts] = useState<InstagramPost[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nextMaxIdRef = useRef<string | undefined>(undefined);

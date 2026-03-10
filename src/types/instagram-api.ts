@@ -18,8 +18,8 @@ export interface IgVideoVersion {
 export interface IgUser {
   pk: number;
   username: string;
-  full_name: string;
-  profile_pic_url: string;
+  full_name?: string;
+  profile_pic_url?: string;
 }
 
 export interface IgCarouselMedia {
@@ -41,7 +41,7 @@ export interface IgFeedItem {
   like_count: number;
   comment_count: number;
   has_liked: boolean;
-  user: IgUser;
+  user?: IgUser | null;
 }
 
 export interface IgFeedResponse {

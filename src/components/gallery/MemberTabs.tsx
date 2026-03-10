@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { memo, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { MEMBERS, type MemberKey } from "@/types/instagram";
 
@@ -9,7 +9,7 @@ interface MemberTabsProps {
   onSelect: (key: MemberKey) => void;
 }
 
-export function MemberTabs({ selected, onSelect }: MemberTabsProps) {
+export const MemberTabs = memo(function MemberTabs({ selected, onSelect }: MemberTabsProps) {
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
@@ -52,4 +52,4 @@ export function MemberTabs({ selected, onSelect }: MemberTabsProps) {
       ))}
     </div>
   );
-}
+});

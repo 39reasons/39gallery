@@ -175,7 +175,7 @@ async function fetchAndMerge(): Promise<WeversePost[]> {
       memberName: detected.name,
       tweetUrl: tweetUrlFromLink(item.link),
       tweetText: stripHtml(item.title),
-      timestamp: Math.floor(new Date(item.pubDate).getTime() / 1000) || 0,
+      timestamp: Math.floor(new Date(item.pubDate).getTime() / 1000) || Math.floor(Date.now() / 1000),
     });
     added = true;
   }
