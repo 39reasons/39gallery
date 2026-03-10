@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { ViewToggle } from "./ViewToggle";
 import { MemberTabs } from "./MemberTabs";
@@ -34,22 +34,17 @@ export function Gallery() {
     retry: wvRetry,
   } = useWeversePosts(selected);
 
-  useEffect(() => {
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
     setLightboxIndex(null);
     setDmLightboxIndex(null);
-  }, [viewMode, selected]);
+  }, []);
 
-  useEffect(() => {
-    if (lightboxIndex !== null && lightboxIndex >= igPosts.length) {
-      setLightboxIndex(null);
-    }
-  }, [igPosts.length, lightboxIndex]);
-
-  useEffect(() => {
-    if (dmLightboxIndex !== null && dmLightboxIndex >= wvPosts.length) {
-      setDmLightboxIndex(null);
-    }
-  }, [wvPosts.length, dmLightboxIndex]);
+  const handleSelectMember = useCallback((key: MemberKey) => {
+    setSelected(key);
+    setLightboxIndex(null);
+    setDmLightboxIndex(null);
+  }, []);
 
   const loading = viewMode === "instagram" ? igLoading : wvLoading;
   const error = viewMode === "instagram" ? igError : wvError;
@@ -58,8 +53,8 @@ export function Gallery() {
   return (
     <section className="space-y-6">
       <nav className="space-y-4" aria-label="Gallery filters">
-        <ViewToggle mode={viewMode} onModeChange={setViewMode} />
-        <MemberTabs selected={selected} onSelect={setSelected} />
+        <ViewToggle mode={viewMode} onModeChange={handleViewModeChange} />
+        <MemberTabs selected={selected} onSelect={handleSelectMember} />
       </nav>
 
       {loading && (
