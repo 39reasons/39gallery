@@ -58,6 +58,17 @@ export function Gallery() {
   const handleCloseLightbox = useCallback(() => setLightboxIndex(null), []);
   const handleCloseDmLightbox = useCallback(() => setDmLightboxIndex(null), []);
 
+  const handlePrevPost = useCallback(() => setLightboxIndex((i) => (i !== null && i > 0 ? i - 1 : i)), []);
+  const handleNextPost = useCallback(
+    () => setLightboxIndex((i) => (i !== null && i < igPosts.length - 1 ? i + 1 : i)),
+    [igPosts.length],
+  );
+  const handlePrevDmPost = useCallback(() => setDmLightboxIndex((i) => (i !== null && i > 0 ? i - 1 : i)), []);
+  const handleNextDmPost = useCallback(
+    () => setDmLightboxIndex((i) => (i !== null && i < wvPosts.length - 1 ? i + 1 : i)),
+    [wvPosts.length],
+  );
+
   const handleLikeToggle = useCallback((postId: string, liked: boolean) => {
     updatePost(postId, (p) => ({
       ...p,
@@ -119,8 +130,8 @@ export function Gallery() {
             key={igPosts[lightboxIndex].id}
             post={igPosts[lightboxIndex]}
             onClose={handleCloseLightbox}
-            onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex(lightboxIndex - 1) : undefined}
-            onNextPost={lightboxIndex < igPosts.length - 1 ? () => setLightboxIndex(lightboxIndex + 1) : undefined}
+            onPrevPost={lightboxIndex > 0 ? handlePrevPost : undefined}
+            onNextPost={lightboxIndex < igPosts.length - 1 ? handleNextPost : undefined}
             onLikeToggle={handleLikeToggle}
           />
         </ErrorBoundary>
@@ -132,8 +143,8 @@ export function Gallery() {
             key={wvPosts[dmLightboxIndex].id}
             post={wvPosts[dmLightboxIndex]}
             onClose={handleCloseDmLightbox}
-            onPrevPost={dmLightboxIndex > 0 ? () => setDmLightboxIndex(dmLightboxIndex - 1) : undefined}
-            onNextPost={dmLightboxIndex < wvPosts.length - 1 ? () => setDmLightboxIndex(dmLightboxIndex + 1) : undefined}
+            onPrevPost={dmLightboxIndex > 0 ? handlePrevDmPost : undefined}
+            onNextPost={dmLightboxIndex < wvPosts.length - 1 ? handleNextDmPost : undefined}
           />
         </ErrorBoundary>
       )}
