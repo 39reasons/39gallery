@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { ViewToggle } from "./ViewToggle";
 import { MemberTabs } from "./MemberTabs";
@@ -47,13 +47,18 @@ export function Gallery() {
     setDmLightboxIndex(null);
   }, []);
 
+  const igPostsRef = useRef(igPosts);
+  igPostsRef.current = igPosts;
+  const wvPostsRef = useRef(wvPosts);
+  wvPostsRef.current = wvPosts;
+
   const handleSelectPost = useCallback((post: { id: string }) => {
-    setLightboxIndex(igPosts.findIndex((p) => p.id === post.id));
-  }, [igPosts]);
+    setLightboxIndex(igPostsRef.current.findIndex((p) => p.id === post.id));
+  }, []);
 
   const handleSelectDmPost = useCallback((post: { id: string }) => {
-    setDmLightboxIndex(wvPosts.findIndex((p) => p.id === post.id));
-  }, [wvPosts]);
+    setDmLightboxIndex(wvPostsRef.current.findIndex((p) => p.id === post.id));
+  }, []);
 
   const handleCloseLightbox = useCallback(() => setLightboxIndex(null), []);
   const handleCloseDmLightbox = useCallback(() => setDmLightboxIndex(null), []);
