@@ -102,10 +102,10 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
     if (now - lastTapRef.current < 300) {
       if (!liked && !liking) {
         handleLike();
+        setShowHeartAnim(true);
+        clearTimeout(heartTimerRef.current);
+        heartTimerRef.current = setTimeout(() => setShowHeartAnim(false), 800);
       }
-      setShowHeartAnim(true);
-      clearTimeout(heartTimerRef.current);
-      heartTimerRef.current = setTimeout(() => setShowHeartAnim(false), 800);
       lastTapRef.current = 0;
     } else {
       lastTapRef.current = now;
