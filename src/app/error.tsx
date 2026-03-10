@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 export default function Error({
   error,
   reset,
@@ -7,6 +9,10 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error("[error-boundary]", error);
+  }, [error]);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4" role="alert">
       <h2 className="text-lg font-semibold text-destructive mb-2">Something went wrong</h2>
