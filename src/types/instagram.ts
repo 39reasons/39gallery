@@ -8,7 +8,6 @@ export interface InstagramPost {
   id: string;
   shortcode: string;
   imageUrl: string;
-  thumbnailUrl: string;
   caption: string;
   timestamp: number;
   likeCount: number;

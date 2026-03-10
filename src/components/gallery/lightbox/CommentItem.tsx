@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { timeAgo } from "@/lib/time";
 import { Avatar } from "./Avatar";
 import { useTranslateButton, detectLanguages } from "./useTranslate";
-import { CommentsResponse, ApiComment as Comment } from "@/types/api-responses";
+import type { CommentsResponse, ApiComment as Comment } from "@/types/api-responses";
 
 function TranslateButton({ canTranslate, toggle, loading, showing }: {
   canTranslate: boolean;
