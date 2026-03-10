@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
   const responseHeaders: Record<string, string> = {
     "Content-Type": contentType,
     "Cache-Control": "public, max-age=86400",
+    "Accept-Ranges": "bytes",
   };
 
   if (contentLength) {
@@ -82,7 +83,6 @@ export async function GET(request: NextRequest) {
   const contentRange = response.headers.get("content-range");
   if (contentRange) {
     responseHeaders["Content-Range"] = contentRange;
-    responseHeaders["Accept-Ranges"] = "bytes";
   }
 
   return new NextResponse(response.body, {
