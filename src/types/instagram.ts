@@ -29,6 +29,14 @@ export interface Member {
   displayName: string;
 }
 
+const MEMBER_KEYS: ReadonlySet<string> = new Set<MemberKey>([
+  "le_sserafim", "chaewon", "sakura", "yunjin", "kazuha", "eunchae",
+]);
+
+export function isMemberKey(value: string): value is MemberKey {
+  return MEMBER_KEYS.has(value);
+}
+
 export const MEMBERS: Member[] = [
   { key: "le_sserafim", username: "le_sserafim", displayName: "LE SSERAFIM" },
   { key: "chaewon", username: "_chaechae_1", displayName: "Chaewon" },
