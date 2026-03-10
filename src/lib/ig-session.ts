@@ -1,3 +1,11 @@
+// Validate at module load time (runs once on server startup)
+if (typeof process !== "undefined" && !process.env.IG_SESSION_ID) {
+  console.warn("[ig-session] IG_SESSION_ID is not set — Instagram API calls will fail");
+}
+if (typeof process !== "undefined" && !process.env.IG_CSRF_TOKEN) {
+  console.warn("[ig-session] IG_CSRF_TOKEN is not set — Instagram API calls will fail");
+}
+
 export const IG_APP_ID = "936619743392459";
 
 export const WEB_UA =
