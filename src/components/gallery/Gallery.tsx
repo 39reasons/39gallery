@@ -58,13 +58,14 @@ export function Gallery() {
       </nav>
 
       {loading && (
-        <div className="flex justify-center py-20">
+        <div className="flex justify-center py-20" role="status">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="sr-only">Loading posts</span>
         </div>
       )}
 
       {error && (
-        <div className="text-center py-20">
+        <div className="text-center py-20" role="alert">
           <p className="text-destructive mb-2">{error}</p>
           <button
             onClick={retry}
