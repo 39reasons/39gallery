@@ -11,7 +11,7 @@ export function getSession(): { sessionId: string; csrfToken: string; dsUserId: 
   if (!sessionId || !csrfToken) {
     throw new Error("No session configured");
   }
-  const dsUserId = sessionId.split("%3A")[0]!;
+  const dsUserId = sessionId.split("%3A")[0] ?? sessionId;
   return { sessionId, csrfToken, dsUserId };
 }
 

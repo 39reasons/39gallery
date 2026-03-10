@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GTranslateResponse } from "@/types/google-translate";
 
 const ALLOWED_TARGETS = new Set([
   "en", "ko", "ja", "zh", "es", "fr", "de", "pt", "ru", "ar", "hi", "th", "vi", "id",
@@ -24,13 +25,13 @@ export async function GET(request: NextRequest) {
   try {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`;
     const res = await fetch(url);
-    const data = await res.json();
+    const data = (await res.json()) as GTranslateResponse;
 
     // Response format: [[["translated text","original text",...],...],...]
-    const translated = (data[0] as [string][])
-      .map((segment: [string]) => segment[0])
+    const translated = data[0]
+      .map((segment) => segment[0])
       .join("");
-    const detectedLang = data[2] as string;
+    const detectedLang = data[2];
 
     return NextResponse.json({ translated, detectedLang });
   } catch (error) {

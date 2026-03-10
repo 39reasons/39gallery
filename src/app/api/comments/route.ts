@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       url = `https://www.instagram.com/api/v1/media/${mediaId}/comments/?can_support_threading=true`;
     }
 
-    const json = (await igWebFetch(url)) as unknown as IgCommentsResponse;
+    const json = await igWebFetch<IgCommentsResponse>(url);
 
     if (json.status !== "ok") {
       return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });

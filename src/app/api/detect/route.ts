@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GTranslateResponse } from "@/types/google-translate";
 
 const NON_LATIN_RE = /[\u0400-\u04FF\u0500-\u052F\u0600-\u06FF\u0900-\u097F\u0E00-\u0E7F\u1100-\u11FF\u3000-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]/u;
 
@@ -30,8 +31,8 @@ export async function POST(request: NextRequest) {
       try {
         const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`;
         const res = await fetch(url);
-        const data = await res.json();
-        const detected = data[2] as string;
+        const data = (await res.json()) as GTranslateResponse;
+        const detected = data[2];
         if (detected === "en" && hasNonLatinScript(text)) {
           return "non-en";
         }

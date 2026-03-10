@@ -9,6 +9,7 @@ import { Lightbox } from "./Lightbox";
 import { DMGrid } from "./DMGrid";
 import { DMLightbox } from "./DMLightbox";
 import { MEMBERS, type MemberKey, type ViewMode, type InstagramPost, type WeversePost } from "@/types/instagram";
+import { PostsResponse, WeverseResponse } from "@/types/api-responses";
 
 export function Gallery() {
   const [viewMode, setViewMode] = useState<ViewMode>("instagram");
@@ -36,7 +37,7 @@ export function Gallery() {
 
     try {
       const res = await fetch(`/api/posts/${member.username}`);
-      const data = await res.json();
+      const data = (await res.json()) as PostsResponse & { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to fetch posts");
       setPosts(data.posts);
       nextMaxIdRef.current = data.nextMaxId;
@@ -57,7 +58,7 @@ export function Gallery() {
     setLoadingMore(true);
     try {
       const res = await fetch(`/api/posts/${member.username}?max_id=${nextMaxIdRef.current}`);
-      const data = await res.json();
+      const data = (await res.json()) as PostsResponse & { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to fetch posts");
       setPosts((prev) => [...prev, ...data.posts]);
       nextMaxIdRef.current = data.nextMaxId;
@@ -75,7 +76,7 @@ export function Gallery() {
 
     try {
       const res = await fetch(`/api/weverse/${memberKey}`);
-      const data = await res.json();
+      const data = (await res.json()) as WeverseResponse & { error?: string };
       if (!res.ok) throw new Error(data.error ?? "Failed to fetch DM updates");
       setWeversePosts(data.posts);
     } catch (err) {
@@ -162,8 +163,8 @@ export function Gallery() {
           key={posts[lightboxIndex].id}
           post={posts[lightboxIndex]}
           onClose={() => setLightboxIndex(null)}
-          onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex((i) => i! - 1) : undefined}
-          onNextPost={lightboxIndex < posts.length - 1 ? () => setLightboxIndex((i) => i! + 1) : undefined}
+          onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex((i) => (i ?? 0) - 1) : undefined}
+          onNextPost={lightboxIndex < posts.length - 1 ? () => setLightboxIndex((i) => (i ?? 0) + 1) : undefined}
           onLikeToggle={(postId, liked) => {
             setPosts((prev) =>
               prev.map((p) =>
@@ -181,8 +182,8 @@ export function Gallery() {
           key={weversePosts[dmLightboxIndex].id}
           post={weversePosts[dmLightboxIndex]}
           onClose={() => setDmLightboxIndex(null)}
-          onPrevPost={() => setDmLightboxIndex((i) => (i! > 0 ? i! - 1 : weversePosts.length - 1))}
-          onNextPost={() => setDmLightboxIndex((i) => (i! < weversePosts.length - 1 ? i! + 1 : 0))}
+          onPrevPost={() => setDmLightboxIndex((i) => ((i ?? 0) > 0 ? (i ?? 0) - 1 : weversePosts.length - 1))}
+          onNextPost={() => setDmLightboxIndex((i) => ((i ?? 0) < weversePosts.length - 1 ? (i ?? 0) + 1 : 0))}
         />
       )}
     </div>

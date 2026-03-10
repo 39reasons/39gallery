@@ -6,7 +6,7 @@ function proxyUrl(igUrl: string): string {
   return `/api/image?url=${encodeURIComponent(igUrl)}`;
 }
 
-async function igFetch(url: string): Promise<unknown> {
+async function igFetch<T>(url: string): Promise<T> {
   const sessionId = process.env.IG_SESSION_ID;
   const headers: Record<string, string> = {
     "x-ig-app-id": IG_APP_ID,
@@ -29,7 +29,7 @@ async function igFetch(url: string): Promise<unknown> {
     throw new Error(`Instagram API error ${res.status}: ${text.slice(0, 100)}`);
   }
 
-  return res.json();
+  return res.json() as Promise<T>;
 }
 
 const USER_IDS: Record<string, string> = {
@@ -46,7 +46,7 @@ async function getUserId(username: string): Promise<string> {
   if (cached) return cached;
 
   const url = `https://i.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
-  const json = (await igFetch(url)) as IgWebProfileResponse;
+  const json = await igFetch<IgWebProfileResponse>(url);
 
   const userId = json?.data?.user?.id;
   if (!userId) {
@@ -69,7 +69,7 @@ export async function fetchPosts(username: string, maxId?: string): Promise<{ po
 
   let url = `https://i.instagram.com/api/v1/feed/user/${userId}/`;
   if (maxId) url += `?max_id=${maxId}`;
-  const json = (await igFetch(url)) as IgFeedResponse;
+  const json = await igFetch<IgFeedResponse>(url);
 
   if (!json?.items) {
     throw new Error(`Instagram returned no items for ${username}`);

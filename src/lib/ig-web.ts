@@ -1,6 +1,6 @@
 import { igHeaders } from "@/lib/ig-session";
 
-export async function igWebFetch(url: string): Promise<Record<string, unknown>> {
+export async function igWebFetch<T>(url: string): Promise<T> {
   const res = await fetch(url, { headers: igHeaders() });
-  return res.json();
+  return res.json() as Promise<T>;
 }

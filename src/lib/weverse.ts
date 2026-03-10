@@ -16,7 +16,7 @@ const CACHE_FILE = join(CACHE_DIR, "posts.json");
 
 function loadCache(): WeversePost[] {
   try {
-    return JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
+    return JSON.parse(readFileSync(CACHE_FILE, "utf-8")) as WeversePost[];
   } catch {
     return [];
   }
@@ -59,7 +59,7 @@ function parseRssItems(xml: string): RssItem[] {
   let match;
 
   while ((match = itemRegex.exec(xml)) !== null) {
-    const block = match[1]!;
+    const block = match[1] ?? "";
     const title = block.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? "";
     const description = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>/)?.[1] ?? "";
     const pubDate = block.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1] ?? "";
@@ -81,7 +81,7 @@ function extractImageUrls(html: string): string[] {
   const imgRegex = /<img\s+src="([^"]+)"/g;
   let match;
   while ((match = imgRegex.exec(html)) !== null) {
-    urls.push(match[1]!);
+    urls.push(match[1] ?? "");
   }
   return urls;
 }
