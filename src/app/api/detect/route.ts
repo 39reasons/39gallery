@@ -18,8 +18,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  const body = await request.json();
-  const texts: unknown = body?.texts;
+  let texts: unknown;
+  try {
+    const body = await request.json();
+    texts = body?.texts;
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
   if (!Array.isArray(texts)) {
     return NextResponse.json({ error: "texts must be an array" }, { status: 400 });
