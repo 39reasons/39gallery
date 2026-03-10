@@ -62,6 +62,11 @@ describe("POST /api/like", () => {
     expect(res.status).toBe(400);
   });
 
+  it("returns 400 when mediaId exceeds max length", async () => {
+    const res = await POST(makeRequest({ mediaId: "1".repeat(31) }));
+    expect(res.status).toBe(400);
+  });
+
   it("sends like request to Instagram", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -134,6 +139,16 @@ describe("POST /api/like", () => {
     expect(res.status).toBe(500);
     const data = await res.json();
     expect(data.error).toBe("Like action failed");
+  });
+
+  it("includes no-store Cache-Control header on success", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ status: "ok" }),
+    });
+
+    const res = await POST(makeRequest({ mediaId: "123456" }));
+    expect(res.headers.get("Cache-Control")).toBe("no-store");
   });
 
   it("returns 500 when no session is configured", async () => {

@@ -63,7 +63,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Like action failed" }, { status: 400 });
     }
 
-    return NextResponse.json({ status: "ok" });
+    return NextResponse.json({ status: "ok" }, {
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (error) {
     console.error("[like]", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Like action failed" }, { status: 500 });
