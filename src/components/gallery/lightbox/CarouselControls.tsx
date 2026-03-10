@@ -26,7 +26,7 @@ export function CarouselControls({
         onClick={onPrev}
         disabled={atStart}
         aria-label="Previous image"
-        className={`absolute left-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 ${
+        className={`absolute left-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 ${
           atStart
             ? "bg-black/30 text-white/30 cursor-default"
             : "bg-black/50 hover:bg-black/70 text-white"
@@ -38,7 +38,7 @@ export function CarouselControls({
         onClick={onNext}
         disabled={atEnd}
         aria-label="Next image"
-        className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 ${
+        className={`absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 ${
           atEnd
             ? "bg-black/30 text-white/30 cursor-default"
             : "bg-black/50 hover:bg-black/70 text-white"
