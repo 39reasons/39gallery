@@ -17,15 +17,15 @@ export async function GET(request: NextRequest) {
   const target = request.nextUrl.searchParams.get("target") ?? "en";
 
   if (!text) {
-    return NextResponse.json({ error: "text is required" }, { status: 400 });
+    return NextResponse.json({ error: "Text is required" }, { status: 400 });
   }
 
   if (text.length > MAX_TEXT_LENGTH) {
-    return NextResponse.json({ error: "text too long" }, { status: 400 });
+    return NextResponse.json({ error: "Text too long" }, { status: 400 });
   }
 
   if (!ALLOWED_TARGETS.has(target)) {
-    return NextResponse.json({ error: "unsupported target language" }, { status: 400 });
+    return NextResponse.json({ error: "Unsupported target language" }, { status: 400 });
   }
 
   try {
@@ -45,7 +45,9 @@ export async function GET(request: NextRequest) {
       .join("");
     const detectedLang = typeof data[2] === "string" ? data[2] : "unknown";
 
-    return NextResponse.json({ translated, detectedLang });
+    return NextResponse.json({ translated, detectedLang }, {
+      headers: { "Cache-Control": "private, max-age=3600" },
+    });
   } catch (error) {
     console.error("[translate]", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Translation failed" }, { status: 500 });
