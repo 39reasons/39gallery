@@ -88,16 +88,21 @@ export const CommentItem = memo(function CommentItem({ comment, mediaId }: { com
     try {
       const url = `/api/comments?mediaId=${encodeURIComponent(mediaId)}&parentId=${encodeURIComponent(comment.id)}`;
       const res = await fetch(url, {
-        signal: controller.signal,
+        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]),
       });
       if (!res.ok) throw new Error(`Failed to load replies (${res.status})`);
       const data = (await res.json()) as CommentsResponse;
       const rawReplies: Comment[] = data.comments ?? [];
-      const texts = rawReplies.map((r) => r.text);
-      const langs = await detectLanguages(texts);
       if (controller.signal.aborted) return;
-      setReplies(rawReplies.map((r, i) => ({ ...r, lang: langs[i] })));
+      setReplies(rawReplies);
       setExpanded(true);
+      const texts = rawReplies.map((r) => r.text);
+      if (texts.length > 0) {
+        const langs = await detectLanguages(texts);
+        if (!controller.signal.aborted) {
+          setReplies(rawReplies.map((r, i) => ({ ...r, lang: langs[i] })));
+        }
+      }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       setReplies([]);
