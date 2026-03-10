@@ -70,7 +70,7 @@ export function LightboxShell({ onClose, onPrevPost, onNextPost, children, sideb
       role="dialog"
       aria-modal="true"
       tabIndex={-1}
-      className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center outline-none"
+      className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center outline-none"
       onClick={onClose}
     >
       <button

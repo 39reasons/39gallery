@@ -175,6 +175,8 @@ async function fetchAndMerge(): Promise<WeversePost[]> {
 
   if (added) {
     cached.sort((a, b) => b.timestamp - a.timestamp);
+    const MAX_CACHED_POSTS = 500;
+    if (cached.length > MAX_CACHED_POSTS) cached.length = MAX_CACHED_POSTS;
     await saveCache(cached);
   }
 
