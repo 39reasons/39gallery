@@ -7,24 +7,33 @@ import type { WeversePost } from "@/types/instagram";
 interface DMLightboxProps {
   post: WeversePost;
   onClose: () => void;
+  onPrevPost?: () => void;
+  onNextPost?: () => void;
 }
 
-export function DMLightbox({ post, onClose }: DMLightboxProps) {
+export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handlePrev = useCallback(() => {
+  // Reset carousel index when post changes
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [post.id]);
+
+  const handlePrevImage = useCallback(() => {
     setCurrentIndex((i) => (i > 0 ? i - 1 : post.imageUrls.length - 1));
   }, [post.imageUrls.length]);
 
-  const handleNext = useCallback(() => {
+  const handleNextImage = useCallback(() => {
     setCurrentIndex((i) => (i < post.imageUrls.length - 1 ? i + 1 : 0));
   }, [post.imageUrls.length]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") handlePrev();
-      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "ArrowLeft" && e.shiftKey) handlePrevImage();
+      else if (e.key === "ArrowRight" && e.shiftKey) handleNextImage();
+      else if (e.key === "ArrowLeft") onPrevPost?.();
+      else if (e.key === "ArrowRight") onNextPost?.();
     }
     document.addEventListener("keydown", onKeyDown);
     document.body.style.overflow = "hidden";
@@ -32,7 +41,7 @@ export function DMLightbox({ post, onClose }: DMLightboxProps) {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [onClose, handlePrev, handleNext]);
+  }, [onClose, handlePrevImage, handleNextImage, onPrevPost, onNextPost]);
 
   const date = new Date(post.timestamp * 1000).toLocaleDateString("en-US", {
     year: "numeric",
@@ -53,6 +62,25 @@ export function DMLightbox({ post, onClose }: DMLightboxProps) {
         <X className="h-6 w-6" />
       </button>
 
+      {onPrevPost && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onPrevPost(); }}
+          className="absolute left-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-2 z-10"
+          aria-label="Previous post"
+        >
+          <ChevronLeft className="h-8 w-8" />
+        </button>
+      )}
+      {onNextPost && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onNextPost(); }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white p-2 z-10"
+          aria-label="Next post"
+        >
+          <ChevronRight className="h-8 w-8" />
+        </button>
+      )}
+
       <div
         className="relative max-w-5xl w-full mx-4 flex flex-col md:flex-row bg-card rounded-lg overflow-hidden max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -69,13 +97,13 @@ export function DMLightbox({ post, onClose }: DMLightboxProps) {
           {post.imageUrls.length > 1 && (
             <>
               <button
-                onClick={handlePrev}
+                onClick={handlePrevImage}
                 className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <button
-                onClick={handleNext}
+                onClick={handleNextImage}
                 className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5"
               >
                 <ChevronRight className="h-5 w-5" />

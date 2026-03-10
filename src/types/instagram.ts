@@ -10,6 +10,9 @@ export interface InstagramPost {
   isVideo: boolean;
   videoUrl?: string;
   carouselImages?: string[];
+  hasLiked?: boolean;
+  ownerUsername?: string;
+  ownerProfilePicUrl?: string;
 }
 
 export interface MemberProfile {

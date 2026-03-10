@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LE SSERAFIM Gallery",
+  title: "Fimstagram",
   description: "Personal gallery for LE SSERAFIM Instagram photos",
 };
 

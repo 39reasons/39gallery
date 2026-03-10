@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { ViewToggle } from "./ViewToggle";
 import { MemberTabs } from "./MemberTabs";
@@ -16,9 +16,15 @@ export function Gallery() {
   const [posts, setPosts] = useState<InstagramPost[]>([]);
   const [weversePosts, setWeversePosts] = useState<WeversePost[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lightboxPost, setLightboxPost] = useState<InstagramPost | null>(null);
-  const [dmLightboxPost, setDmLightboxPost] = useState<WeversePost | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [dmLightboxIndex, setDmLightboxIndex] = useState<number | null>(null);
+  const nextMaxIdRef = useRef<string | undefined>(undefined);
+  const loadingMoreRef = useRef(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
 
   const fetchInstagramPosts = useCallback(async (memberKey: MemberKey) => {
     const member = MEMBERS.find((m) => m.key === memberKey);
@@ -26,17 +32,40 @@ export function Gallery() {
 
     setLoading(true);
     setError(null);
+    nextMaxIdRef.current = undefined;
 
     try {
       const res = await fetch(`/api/posts/${member.username}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to fetch posts");
       setPosts(data.posts);
+      nextMaxIdRef.current = data.nextMaxId;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch posts");
       setPosts([]);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const fetchMorePosts = useCallback(async () => {
+    if (!nextMaxIdRef.current || loadingMoreRef.current) return;
+    const member = MEMBERS.find((m) => m.key === selectedRef.current);
+    if (!member) return;
+
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/posts/${member.username}?max_id=${nextMaxIdRef.current}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to fetch posts");
+      setPosts((prev) => [...prev, ...data.posts]);
+      nextMaxIdRef.current = data.nextMaxId;
+    } catch {
+      // silently fail on load-more
+    } finally {
+      loadingMoreRef.current = false;
+      setLoadingMore(false);
     }
   }, []);
 
@@ -64,6 +93,24 @@ export function Gallery() {
       fetchWeverseDMs(selected);
     }
   }, [selected, viewMode, fetchInstagramPosts, fetchWeverseDMs]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (viewMode !== "instagram") return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchMorePosts();
+        }
+      },
+      { rootMargin: "400px" }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [viewMode, loading, fetchMorePosts]);
 
   return (
     <div className="space-y-6">
@@ -95,19 +142,46 @@ export function Gallery() {
       )}
 
       {!loading && !error && viewMode === "instagram" && (
-        <PhotoGrid posts={posts} onSelect={setLightboxPost} />
+        <>
+          <PhotoGrid posts={posts} onSelect={(post) => setLightboxIndex(posts.indexOf(post))} />
+          <div ref={sentinelRef} className="h-1" />
+          {loadingMore && (
+            <div className="flex justify-center py-4">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          )}
+        </>
       )}
 
       {!loading && !error && viewMode === "weverse" && (
-        <DMGrid posts={weversePosts} onSelect={setDmLightboxPost} />
+        <DMGrid posts={weversePosts} onSelect={(post) => setDmLightboxIndex(weversePosts.indexOf(post))} />
       )}
 
-      {lightboxPost && (
-        <Lightbox post={lightboxPost} onClose={() => setLightboxPost(null)} />
+      {lightboxIndex !== null && posts[lightboxIndex] && (
+        <Lightbox
+          post={posts[lightboxIndex]}
+          onClose={() => setLightboxIndex(null)}
+          onPrevPost={lightboxIndex > 0 ? () => setLightboxIndex((i) => i! - 1) : undefined}
+          onNextPost={lightboxIndex < posts.length - 1 ? () => setLightboxIndex((i) => i! + 1) : undefined}
+          onLikeToggle={(postId, liked) => {
+            setPosts((prev) =>
+              prev.map((p) =>
+                p.id === postId
+                  ? { ...p, hasLiked: liked, likeCount: p.likeCount + (liked ? 1 : -1) }
+                  : p
+              )
+            );
+          }}
+        />
       )}
 
-      {dmLightboxPost && (
-        <DMLightbox post={dmLightboxPost} onClose={() => setDmLightboxPost(null)} />
+      {dmLightboxIndex !== null && weversePosts[dmLightboxIndex] && (
+        <DMLightbox
+          post={weversePosts[dmLightboxIndex]}
+          onClose={() => setDmLightboxIndex(null)}
+          onPrevPost={() => setDmLightboxIndex((i) => (i! > 0 ? i! - 1 : weversePosts.length - 1))}
+          onNextPost={() => setDmLightboxIndex((i) => (i! < weversePosts.length - 1 ? i! + 1 : 0))}
+        />
       )}
     </div>
   );
