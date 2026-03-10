@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchPosts } from "@/lib/instagram";
 import { MEMBERS } from "@/types/instagram";
+import { rateLimit } from "@/lib/rate-limit";
 
 const MAX_ID_RE = /^[\w-]{1,60}$/;
 
@@ -8,6 +9,11 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ username: string }> }
 ) {
+  const { success } = rateLimit(request, { limit: 30, windowMs: 60_000 });
+  if (!success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { username } = await params;
   const maxId = request.nextUrl.searchParams.get("max_id") ?? undefined;
 

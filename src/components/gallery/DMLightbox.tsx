@@ -60,8 +60,9 @@ export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightbox
         <img
           src={post.imageUrls[currentIndex] ?? post.imageUrls[0]}
           alt={`Weverse DM from ${post.memberName}`}
-          className="max-h-[70vh] md:max-h-[85vh] w-full object-contain"
+          className="max-h-[70vh] md:max-h-[85vh] w-full object-contain select-none"
           referrerPolicy="no-referrer"
+          draggable={false}
         />
         <CarouselControls
           currentIndex={currentIndex}
