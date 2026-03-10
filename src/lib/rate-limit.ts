@@ -53,6 +53,13 @@ export function rateLimit(
   filtered.push(now);
   store.set(ip, filtered);
 
+  // Inline eviction: cap store size on every request to prevent
+  // unbounded growth between cleanup cycles
+  if (store.size > MAX_STORE_SIZE) {
+    const oldest = store.keys().next().value;
+    if (oldest !== undefined && oldest !== ip) store.delete(oldest);
+  }
+
   const remaining = Math.max(0, limit - filtered.length);
   return { success: filtered.length <= limit, remaining };
 }
