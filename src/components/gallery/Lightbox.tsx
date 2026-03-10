@@ -56,7 +56,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
         const texts = rawComments.map((c) => c.text);
         if (texts.length > 0) {
           const langs = await detectLanguages(texts);
-          if (!controller.signal.aborted) setComments(rawComments.map((c, i) => ({ ...c, lang: langs[i] })));
+          if (!controller.signal.aborted) setComments(rawComments.map((c, i) => ({ ...c, lang: langs[i] ?? "unknown" })));
         }
       })
       .catch((err) => {

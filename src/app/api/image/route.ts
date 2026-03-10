@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Reject responses without content-length to prevent unbounded streaming
-  if (!contentLength && !rangeHeader) {
+  if (!contentLength) {
     response.body?.cancel();
     return NextResponse.json({ error: "Missing content length" }, { status: 502 });
   }

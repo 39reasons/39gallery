@@ -97,7 +97,7 @@ export const CommentItem = memo(function CommentItem({ comment, mediaId }: { com
       if (texts.length > 0) {
         const langs = await detectLanguages(texts);
         if (!controller.signal.aborted) {
-          setReplies(rawReplies.map((r, i) => ({ ...r, lang: langs[i] })));
+          setReplies(rawReplies.map((r, i) => ({ ...r, lang: langs[i] ?? "unknown" })));
         }
       }
     } catch (err) {
