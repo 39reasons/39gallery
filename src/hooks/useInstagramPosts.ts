@@ -60,7 +60,7 @@ export function useInstagramPosts(memberKey: MemberKey) {
     setLoadingMore(true);
     try {
       const data = await apiFetch<PostsResponse>(
-        `/api/posts/${member.username}?max_id=${nextMaxIdRef.current}`,
+        `/api/posts/${member.username}?max_id=${encodeURIComponent(nextMaxIdRef.current)}`,
         { signal: controller.signal },
       );
       failCountRef.current = 0;
