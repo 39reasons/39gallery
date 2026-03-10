@@ -80,6 +80,21 @@ describe("apiFetch", () => {
     }
   });
 
+  it("falls back to generic message when error field is non-string", async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: () => Promise.resolve({ error: { nested: true } }),
+    });
+
+    try {
+      await apiFetch("/api/test");
+    } catch (e) {
+      const err = e as ApiError;
+      expect(err.message).toBe("Request failed (500)");
+    }
+  });
+
   it("passes options through to fetch", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
