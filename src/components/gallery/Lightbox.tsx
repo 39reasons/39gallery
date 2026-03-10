@@ -48,7 +48,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
     setComments([]);
     setCommentsLoading(true);
     setCommentsError(false);
-    apiFetch<CommentsResponse>(`/api/comments?mediaId=${post.id}`)
+    apiFetch<CommentsResponse>(`/api/comments?mediaId=${encodeURIComponent(post.id)}`)
       .then(async (data) => {
         if (stale) return;
         const rawComments: Comment[] = data.comments ?? [];

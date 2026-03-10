@@ -86,7 +86,8 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
     setLoading(true);
     setReplyError(false);
     try {
-      const res = await fetch(`/api/comments?mediaId=${mediaId}&parentId=${comment.id}`, {
+      const url = `/api/comments?mediaId=${encodeURIComponent(mediaId)}&parentId=${encodeURIComponent(comment.id)}`;
+      const res = await fetch(url, {
         signal: AbortSignal.timeout(10000),
       });
       if (!res.ok) throw new Error(`Failed to load replies (${res.status})`);
