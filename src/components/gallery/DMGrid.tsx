@@ -44,7 +44,7 @@ export const DMGrid = memo(function DMGrid({ posts, onSelect }: DMGridProps) {
           )}
           <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2 pt-6">
             <span className="text-xs font-medium text-white/90">{post.memberName}</span>
-            <time className="block text-xs text-white/70">
+            <time dateTime={new Date(post.timestamp * 1000).toISOString()} className="block text-xs text-white/70">
               {new Date(post.timestamp * 1000).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",

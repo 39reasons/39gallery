@@ -44,29 +44,30 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
   const [commentRetry, setCommentRetry] = useState(0);
 
   useEffect(() => {
-    let stale = false;
+    const controller = new AbortController();
     setComments([]);
     setCommentsLoading(true);
     setCommentsError(false);
-    apiFetch<CommentsResponse>(`/api/comments?mediaId=${encodeURIComponent(post.id)}`)
+    apiFetch<CommentsResponse>(`/api/comments?mediaId=${encodeURIComponent(post.id)}`, { signal: controller.signal })
       .then(async (data) => {
-        if (stale) return;
+        if (controller.signal.aborted) return;
         const rawComments: Comment[] = data.comments ?? [];
         setComments(rawComments);
         const texts = rawComments.map((c) => c.text);
         if (texts.length > 0) {
           const langs = await detectLanguages(texts);
-          if (!stale) setComments(rawComments.map((c, i) => ({ ...c, lang: langs[i] })));
+          if (!controller.signal.aborted) setComments(rawComments.map((c, i) => ({ ...c, lang: langs[i] })));
         }
       })
-      .catch(() => {
-        if (!stale) {
+      .catch((err) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        if (!controller.signal.aborted) {
           setComments([]);
           setCommentsError(true);
         }
       })
-      .finally(() => { if (!stale) setCommentsLoading(false); });
-    return () => { stale = true; };
+      .finally(() => { if (!controller.signal.aborted) setCommentsLoading(false); });
+    return () => { controller.abort(); };
   }, [post.id, commentRetry]);
 
   const handleLike = useCallback(async () => {
@@ -171,7 +172,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
               {post.commentCount.toLocaleString()}
             </span>
           </div>
-          <time className="text-xs text-muted-foreground">{date}</time>
+          <time dateTime={new Date(post.timestamp * 1000).toISOString()} className="text-xs text-muted-foreground">{date}</time>
           {post.caption && (
             <div>
               <p className="text-sm leading-relaxed whitespace-pre-line break-words">
