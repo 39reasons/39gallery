@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 
@@ -8,14 +8,19 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "Fimstagram",
-  description: "Personal gallery for LE SSERAFIM Instagram photos",
+  description: "Personal gallery for LE SSERAFIM Instagram photos and Weverse updates",
+  openGraph: {
+    title: "Fimstagram",
+    description: "LE SSERAFIM Photo Gallery",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Fimstagram",
+    description: "LE SSERAFIM Photo Gallery",
+  },
 };
 
 export default function RootLayout({
@@ -25,9 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

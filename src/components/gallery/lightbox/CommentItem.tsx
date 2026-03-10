@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { timeAgo } from "@/lib/time";
 import { Avatar } from "./Avatar";
 import { useTranslateButton, detectLanguages } from "./useTranslate";
+import { CommentsResponse } from "@/types/api-responses";
 
 interface Comment {
   id: string;
@@ -83,7 +84,7 @@ export function CommentItem({ comment, mediaId }: { comment: Comment; mediaId: s
     setLoading(true);
     try {
       const res = await fetch(`/api/comments?mediaId=${mediaId}&parentId=${comment.id}`);
-      const data = await res.json();
+      const data = (await res.json()) as CommentsResponse;
       const rawReplies: Comment[] = data.comments ?? [];
       const texts = rawReplies.map((r) => r.text);
       const langs = await detectLanguages(texts);

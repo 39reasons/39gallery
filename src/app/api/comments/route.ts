@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { igWebFetch } from "@/lib/ig-web";
 import { IgComment, IgCommentsResponse } from "@/types/instagram-api";
 
+const NUMERIC_ID = /^\d{1,30}$/;
+
 function mapComment(c: IgComment) {
   return {
     id: String(c.pk),
@@ -18,8 +20,12 @@ export async function GET(request: NextRequest) {
   const mediaId = request.nextUrl.searchParams.get("mediaId");
   const parentId = request.nextUrl.searchParams.get("parentId");
 
-  if (!mediaId) {
-    return NextResponse.json({ error: "mediaId is required" }, { status: 400 });
+  if (!mediaId || !NUMERIC_ID.test(mediaId)) {
+    return NextResponse.json({ error: "valid mediaId is required" }, { status: 400 });
+  }
+
+  if (parentId && !NUMERIC_ID.test(parentId)) {
+    return NextResponse.json({ error: "invalid parentId" }, { status: 400 });
   }
 
   try {
@@ -30,7 +36,7 @@ export async function GET(request: NextRequest) {
       url = `https://www.instagram.com/api/v1/media/${mediaId}/comments/?can_support_threading=true`;
     }
 
-    const json = (await igWebFetch(url)) as unknown as IgCommentsResponse;
+    const json = await igWebFetch<IgCommentsResponse>(url);
 
     if (json.status !== "ok") {
       return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { DetectResponse, TranslateResponse } from "@/types/api-responses";
 
 export async function detectLanguages(texts: string[]): Promise<string[]> {
   try {
@@ -9,7 +10,7 @@ export async function detectLanguages(texts: string[]): Promise<string[]> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ texts }),
     });
-    const data = await res.json();
+    const data = (await res.json()) as DetectResponse;
     return data.languages;
   } catch {
     return texts.map(() => "unknown");
@@ -42,7 +43,7 @@ export function useTranslateButton(text: string, lang?: string) {
     setLoading(true);
     try {
       const res = await fetch(`/api/translate?text=${encodeURIComponent(text)}`);
-      const data = await res.json();
+      const data = (await res.json()) as TranslateResponse;
       setTranslated(data.translated ?? "Translation failed");
       setShowing(true);
     } catch {

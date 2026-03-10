@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { igHeaders } from "@/lib/ig-session";
 
+const NUMERIC_ID = /^\d{1,30}$/;
+
 export async function POST(request: Request) {
   const { mediaId, unlike } = await request.json();
 
-  if (!mediaId) {
-    return NextResponse.json({ error: "mediaId is required" }, { status: 400 });
+  if (!mediaId || typeof mediaId !== "string" || !NUMERIC_ID.test(mediaId)) {
+    return NextResponse.json({ error: "valid mediaId is required" }, { status: 400 });
   }
 
   let headers: Record<string, string>;

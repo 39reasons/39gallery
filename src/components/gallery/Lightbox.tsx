@@ -3,6 +3,7 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 import { Heart, MessageCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { InstagramPost } from "@/types/instagram";
+import { CommentsResponse } from "@/types/api-responses";
 import { LightboxShell } from "./LightboxShell";
 import { CommentItem, type Comment } from "./lightbox/CommentItem";
 import { useTranslateButton, detectLanguages } from "./lightbox/useTranslate";
@@ -36,7 +37,7 @@ export function Lightbox({ post, onClose, onPrevPost, onNextPost, onLikeToggle }
     setComments([]);
     setCommentsLoading(true);
     fetch(`/api/comments?mediaId=${post.id}`)
-      .then((res) => res.json())
+      .then((res) => res.json() as Promise<CommentsResponse>)
       .then(async (data) => {
         const rawComments: Comment[] = data.comments ?? [];
         const texts = rawComments.map((c) => c.text);
