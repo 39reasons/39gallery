@@ -75,7 +75,7 @@ export function LightboxShell({ onClose, onPrevPost, onNextPost, children, sideb
     >
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 text-white/80 hover:text-white p-2 z-10"
+        className="absolute top-4 right-4 text-white/80 hover:text-white p-2 z-10 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 rounded-md"
         aria-label="Close"
       >
         <X className="h-6 w-6" />
@@ -84,7 +84,7 @@ export function LightboxShell({ onClose, onPrevPost, onNextPost, children, sideb
       <button
         onClick={(e) => { e.stopPropagation(); onPrevPost?.(); }}
         disabled={!onPrevPost}
-        className={`absolute left-2 top-1/2 -translate-y-1/2 p-2 z-10 ${onPrevPost ? "text-white/60 hover:text-white" : "text-white/20 cursor-default"}`}
+        className={`absolute left-2 top-1/2 -translate-y-1/2 p-2 z-10 rounded-md focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 ${onPrevPost ? "text-white/60 hover:text-white" : "text-white/20 cursor-default"}`}
         aria-label="Previous post"
       >
         <ChevronLeft className="h-8 w-8" />
@@ -92,7 +92,7 @@ export function LightboxShell({ onClose, onPrevPost, onNextPost, children, sideb
       <button
         onClick={(e) => { e.stopPropagation(); onNextPost?.(); }}
         disabled={!onNextPost}
-        className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 z-10 ${onNextPost ? "text-white/60 hover:text-white" : "text-white/20 cursor-default"}`}
+        className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 z-10 rounded-md focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 ${onNextPost ? "text-white/60 hover:text-white" : "text-white/20 cursor-default"}`}
         aria-label="Next post"
       >
         <ChevronRight className="h-8 w-8" />

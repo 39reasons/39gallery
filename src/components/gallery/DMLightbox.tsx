@@ -13,6 +13,15 @@ interface DMLightboxProps {
   onNextPost?: () => void;
 }
 
+function isSafeTweetUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname === "x.com" || parsed.hostname === "twitter.com";
+  } catch {
+    return false;
+  }
+}
+
 export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightboxProps) {
   const { currentIndex, prev, next, goTo } = useCarousel(post.imageUrls.length);
 
@@ -41,16 +50,18 @@ export function DMLightbox({ post, onClose, onPrevPost, onNextPost }: DMLightbox
               {post.tweetText}
             </p>
           )}
-          <a
-            href={post.tweetUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="View on X (opens in new tab)"
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mt-auto"
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-            View on X
-          </a>
+          {isSafeTweetUrl(post.tweetUrl) && (
+            <a
+              href={post.tweetUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View on X (opens in new tab)"
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mt-auto"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View on X
+            </a>
+          )}
         </div>
       }
     >
