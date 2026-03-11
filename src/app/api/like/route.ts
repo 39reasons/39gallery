@@ -5,7 +5,7 @@ import { rateLimit } from "@/lib/rate-limit";
 const NUMERIC_ID = /^\d{1,30}$/;
 
 export async function POST(request: NextRequest) {
-  const { success } = rateLimit(request, { limit: 30, windowMs: 60_000 });
+  const { success } = rateLimit(request, { limit: 60, windowMs: 60_000 });
   if (!success) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": "60" } });
   }
