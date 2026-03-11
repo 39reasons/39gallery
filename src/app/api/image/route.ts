@@ -81,12 +81,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Response too large" }, { status: 413 });
   }
 
-  // Reject responses without content-length to prevent unbounded streaming
-  if (!contentLength) {
-    response.body?.cancel();
-    return NextResponse.json({ error: "Missing content length" }, { status: 502 });
-  }
-
   const responseHeaders: Record<string, string> = {
     "Content-Type": contentType,
     "Content-Disposition": "inline",
@@ -101,6 +95,25 @@ export async function GET(request: NextRequest) {
   const contentRange = response.headers.get("content-range");
   if (contentRange) {
     responseHeaders["Content-Range"] = contentRange;
+  }
+
+  // If no Content-Length, cap the stream at maxSize to prevent unbounded streaming
+  if (!contentLength && response.body) {
+    let received = 0;
+    const transform = new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        received += chunk.byteLength;
+        if (received > maxSize) {
+          controller.error(new Error("Response too large"));
+          return;
+        }
+        controller.enqueue(chunk);
+      },
+    });
+    return new NextResponse(response.body.pipeThrough(transform), {
+      status: response.status,
+      headers: responseHeaders,
+    });
   }
 
   return new NextResponse(response.body, {

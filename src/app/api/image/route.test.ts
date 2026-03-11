@@ -180,23 +180,18 @@ describe("GET /api/image", () => {
     expect(res.status).toBe(413);
   });
 
-  it("returns 502 when content-length is missing", async () => {
-    globalThis.fetch = mockUpstream({ contentLength: null });
+  it("streams through size-capped transform when content-length is missing", async () => {
+    const chunk = new Uint8Array(512);
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(chunk);
+        controller.close();
+      },
+    });
+    globalThis.fetch = mockUpstream({ contentLength: null, body: stream });
     const res = await GET(makeRequest({ url: "https://nitter.net/img.jpg" }));
-    expect(res.status).toBe(502);
-    const data = await res.json();
-    expect(data.error).toBe("Missing content length");
-  });
-
-  it("returns 502 when content-length is missing on range request", async () => {
-    globalThis.fetch = mockUpstream({ status: 206, contentLength: null, contentRange: "bytes 0-999/*" });
-    const res = await GET(makeRequest(
-      { url: "https://nitter.net/img.jpg" },
-      { range: "bytes=0-999" },
-    ));
-    expect(res.status).toBe(502);
-    const data = await res.json();
-    expect(data.error).toBe("Missing content length");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Length")).toBeNull();
   });
 
   it("sets Cache-Control, Content-Type, and Content-Disposition headers on success", async () => {
